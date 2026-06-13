@@ -10,6 +10,7 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more — deployed v
 | **Infrastructure** | Terraform + Hetzner | Server provisioning as code |
 | **Kubernetes** | k3s | Lightweight single-node cluster |
 | **Ingress** | Traefik | HTTP/HTTPS routing (k3s built-in) |
+| **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
 | **TLS** | cert-manager + Let's Encrypt | Automatic certificate management |
 | **GitOps** | ArgoCD | Declarative, Git-driven deployments |
 | **CI/CD** | GitHub Actions | Build and push on merge to main |
@@ -67,6 +68,9 @@ You go to Let's Encrypt, prove you own the domain by manually placing a file on 
 
 **Without Traefik (ingress):**
 Every service you run needs its own public port (`:3000`, `:8080`, etc.) and you manage routing yourself. With Traefik, all traffic comes in on `:443` and it routes to the right service based on the hostname — `christian-wallace.com` goes to the site, `argocd.christian-wallace.com` goes to ArgoCD, all on the same IP.
+
+**Without Helm:**
+Installing cert-manager without Helm means finding the right GitHub release, downloading a single massive YAML file (~1,000 lines), applying it with `kubectl apply -f`, and hoping the defaults work for you. Want to change a setting (more replicas, different log level, resource limits)? You edit a file you don't own, which gets overwritten next time you upgrade. Upgrading means downloading a new YAML file and re-applying it — there's no record of what changed or what version you're on. With Helm, `helm install` tracks the version and your overrides, `helm upgrade` diffs cleanly, and `helm rollback` undoes it in one command.
 
 **Without ArgoCD (coming next):**
 Deploying a change means SSHing into the server, or running `kubectl apply` from your laptop with the right kubeconfig. If you change something manually and it breaks, there's no easy rollback and no record of what changed. With ArgoCD, the cluster watches your GitHub repo — push a commit, the cluster reconciles itself to match. Rollback is `git revert`.
