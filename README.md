@@ -52,6 +52,25 @@ graph TB
     CertManager -->|TLS cert| Traefik
 ```
 
+## How Each Tool Earns Its Place
+
+Every tool here replaces something painful. This is what the stack looks like without it:
+
+**Without Terraform:**
+You SSH into Hetzner's dashboard, click through a web UI to create a server, manually set firewall rules, and hope you remember what you did if you ever need to rebuild. With Terraform, the server, firewall, and SSH key are code — `terraform apply` rebuilds the exact same thing from scratch in 30 seconds.
+
+**Without Cloudflare DNS-as-code:**
+You log into the Cloudflare dashboard and manually type in the IP address. If you ever reprovision the server and get a new IP, you have to remember to go update it. With Terraform managing the DNS record, `terraform apply` updates the A record automatically whenever the server IP changes.
+
+**Without cert-manager:**
+You go to Let's Encrypt, prove you own the domain by manually placing a file on your server, download the certificate files, upload them to Kubernetes as a Secret, configure Traefik to use them, and set a calendar reminder to repeat all of this in 90 days when they expire. With cert-manager, you annotate an Ingress with `cert-manager.io/cluster-issuer: letsencrypt-prod` and it handles the proof, the issuance, the Secret, and the renewal — forever.
+
+**Without Traefik (ingress):**
+Every service you run needs its own public port (`:3000`, `:8080`, etc.) and you manage routing yourself. With Traefik, all traffic comes in on `:443` and it routes to the right service based on the hostname — `christian-wallace.com` goes to the site, `argocd.christian-wallace.com` goes to ArgoCD, all on the same IP.
+
+**Without ArgoCD (coming next):**
+Deploying a change means SSHing into the server, or running `kubectl apply` from your laptop with the right kubeconfig. If you change something manually and it breaks, there's no easy rollback and no record of what changed. With ArgoCD, the cluster watches your GitHub repo — push a commit, the cluster reconciles itself to match. Rollback is `git revert`.
+
 ## Repository Layout
 
 ```
@@ -95,8 +114,8 @@ k9s
 - [x] **Month 1 — Ship it**
   - [x] Hetzner server provisioned via Terraform
   - [x] k3s cluster running
-  - [ ] Cloudflare DNS → server
-  - [ ] cert-manager (automatic TLS)
+  - [x] Cloudflare DNS → server
+  - [x] cert-manager (automatic TLS)
   - [ ] ArgoCD (GitOps)
   - [ ] Site live at christian-wallace.com
 

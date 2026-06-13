@@ -4,11 +4,37 @@ terraform {
       source  = "hetznercloud/hcloud"
       version = "~> 1.49"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
   }
 }
 
 provider "hcloud" {
   token = var.hcloud_token
+}
+
+provider "cloudflare" {
+  api_token = var.cloudflare_token
+}
+
+resource "cloudflare_record" "root" {
+  zone_id = var.cloudflare_zone_id
+  name    = "@"
+  type    = "A"
+  content = hcloud_server.k3s.ipv4_address
+  ttl     = 1
+  proxied = false
+}
+
+resource "cloudflare_record" "www" {
+  zone_id = var.cloudflare_zone_id
+  name    = "www"
+  type    = "A"
+  content = hcloud_server.k3s.ipv4_address
+  ttl     = 1
+  proxied = false
 }
 
 resource "hcloud_ssh_key" "default" {
