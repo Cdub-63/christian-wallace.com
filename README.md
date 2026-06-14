@@ -72,7 +72,7 @@ Every service you run needs its own public port (`:3000`, `:8080`, etc.) and you
 **Without Helm:**
 Installing cert-manager without Helm means finding the right GitHub release, downloading a single massive YAML file (~1,000 lines), applying it with `kubectl apply -f`, and hoping the defaults work for you. Want to change a setting (more replicas, different log level, resource limits)? You edit a file you don't own, which gets overwritten next time you upgrade. Upgrading means downloading a new YAML file and re-applying it — there's no record of what changed or what version you're on. With Helm, `helm install` tracks the version and your overrides, `helm upgrade` diffs cleanly, and `helm rollback` undoes it in one command.
 
-**Without ArgoCD (coming next):**
+**Without ArgoCD:**
 Deploying a change means SSHing into the server, or running `kubectl apply` from your laptop with the right kubeconfig. If you change something manually and it breaks, there's no easy rollback and no record of what changed. With ArgoCD, the cluster watches your GitHub repo — push a commit, the cluster reconciles itself to match. Rollback is `git revert`.
 
 ## Repository Layout
@@ -113,23 +113,3 @@ kubectl get pods -A
 k9s
 ```
 
-## Roadmap
-
-- [x] **Month 1 — Ship it**
-  - [x] Hetzner server provisioned via Terraform
-  - [x] k3s cluster running
-  - [x] Cloudflare DNS → server
-  - [x] cert-manager (automatic TLS)
-  - [ ] ArgoCD (GitOps)
-  - [ ] Site live at christian-wallace.com
-
-- [ ] **Month 2 — Go deeper**
-  - [ ] RBAC, NetworkPolicy, resource limits, HPA
-  - [ ] Prometheus + Grafana observability
-  - [ ] GitHub Actions CI/CD pipeline
-  - [ ] Blog posts documenting architecture decisions
-
-- [ ] **Month 3 — Harden & prep**
-  - [ ] Second Hetzner node (HA, etcd concepts)
-  - [ ] Security hardening (PodSecurityAdmission, Falco, sealed secrets)
-  - [ ] Architecture write-up
