@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering — Christian D Wallace</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      line-height: 1.6;
+    }
+
+    a { color: #1d4ed8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    nav {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid #e2e8f0;
+      background: #ffffff;
+    }
+
+    nav a {
+      font-size: 0.875rem;
+      color: #475569;
+    }
+
+    nav a:hover { color: #0f172a; text-decoration: none; }
+
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .hero .subtitle {
+      font-size: 1rem;
+      color: #475569;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero p {
+      font-size: 0.975rem;
+      color: #334155;
+      max-width: 640px;
+    }
+
+    .divider {
+      width: 36px;
+      height: 2px;
+      background: #1d4ed8;
+      margin: 2.5rem 0;
+    }
+
+    section { margin-bottom: 3rem; }
+
+    h2 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 1.25rem;
+    }
+
+    .highlight-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .highlight-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .highlight-card .stat {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1d4ed8;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    .highlight-card .desc {
+      font-size: 0.825rem;
+      color: #475569;
+    }
+
+    .work-item {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .work-item:last-child { margin-bottom: 0; }
+
+    .work-dot {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      background: #1d4ed8;
+      border-radius: 50%;
+      margin-top: 0.45rem;
+    }
+
+    .work-item h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .work-item p {
+      font-size: 0.85rem;
+      color: #475569;
+    }
+
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .stack-group {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .stack-group .category {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    .stack-group .items {
+      font-size: 0.825rem;
+      color: #334155;
+      line-height: 1.7;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #1d4ed8;
+    }
+
+    @media (max-width: 560px) {
+      .highlight-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav><a href="/">← Home</a></nav>
+
+<div class="page">
+
+  <div class="hero">
+    <h1>Christian D Wallace</h1>
+    <p class="subtitle">Senior Platform &amp; Site Reliability Engineer &mdash; Chicago, IL</p>
+    <p>10 years bridging production networking and cloud infrastructure at scale. Currently architecting Instructure's multi-region EKS platform that powers Canvas LMS for tens of millions of learners worldwide. I combine deep networking foundations with modern platform engineering — and I own migrations end-to-end.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <section>
+    <h2>By the numbers</h2>
+    <div class="highlight-grid">
+      <div class="highlight-card">
+        <div class="stat">40</div>
+        <div class="desc">EKS clusters across 8 production AWS regions</div>
+      </div>
+      <div class="highlight-card">
+        <div class="stat">433</div>
+        <div class="desc">Active service deployments on ArgoCD GitOps</div>
+      </div>
+      <div class="highlight-card">
+        <div class="stat">34</div>
+        <div class="desc">Transit Gateways migrated across 9 regions with zero customer impact</div>
+      </div>
+      <div class="highlight-card">
+        <div class="stat">60%</div>
+        <div class="desc">Bandwidth reduction via VPN split-tunneling at Trevipay</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>What I&#8217;ve shipped</h2>
+    <div class="work-item">
+      <div class="work-dot"></div>
+      <div>
+        <h3>Internal Developer Platform at Instructure</h3>
+        <p>Built and scaled "Trigger" — the platform powering Canvas LMS deployments. Helm/Kustomize manifests, Kyverno policy-as-code, Akuity-managed ArgoCD GitOps. Led migration of production workloads off legacy Cloudgate/Condor PaaS onto a Node.js/Express + MongoDB deployment API.</p>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-dot"></div>
+      <div>
+        <h3>Company-wide Zero-Trust Access Modernization</h3>
+        <p>Phased AppGate ZTNA rollout replacing Teleport and standalone SSH keys for the entire engineering org. Wired ArgoCD prod Okta SSO via SCIM and rotated IAM Identity Center SCIM tokens across multi-account AWS Organizations.</p>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-dot"></div>
+      <div>
+        <h3>AWS Transit Gateway Mesh Migration</h3>
+        <p>Migrated two parallel TGW meshes off VyOS-on-EC2, then led a fleet-wide security-group referencing rollout across 34 TGWs in 9 regions — eliminating thousands of CIDR-based rules. Authored reusable Terraform modules and orchestrated Terraform Cloud workspace applies at scale.</p>
+      </div>
+    </div>
+    <div class="work-item">
+      <div class="work-dot"></div>
+      <div>
+        <h3>FinOps &amp; Cloud Security Tooling</h3>
+        <p>CrowdStrike CSPM across 9 AWS accounts, AWS Config continuous-mode StackSets org-wide, CloudZero cost-attribution labels across the EKS fleet, and WAF tuning during an active post-compromise investigation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Technical stack</h2>
+    <div class="stack-grid">
+      <div class="stack-group">
+        <div class="category">Cloud / AWS</div>
+        <div class="items">EKS · Transit Gateway · IAM Identity Center · LZA · VPC/IPAM · CloudFront · WAFv2</div>
+      </div>
+      <div class="stack-group">
+        <div class="category">Platform</div>
+        <div class="items">Kubernetes · ArgoCD · Helm · Kustomize · Kyverno · Akuity</div>
+      </div>
+      <div class="stack-group">
+        <div class="category">IaC &amp; CI/CD</div>
+        <div class="items">Terraform · Terraform Cloud · Ansible · GitHub Actions · Jenkins</div>
+      </div>
+      <div class="stack-group">
+        <div class="category">Security</div>
+        <div class="items">Zero-Trust · AppGate ZTNA · Okta SSO/SCIM · Vault · CrowdStrike CSPM · Wiz</div>
+      </div>
+      <div class="stack-group">
+        <div class="category">Networking</div>
+        <div class="items">BGP · IPsec · SD-WAN · Cisco ACI · AWS TGW</div>
+      </div>
+      <div class="stack-group">
+        <div class="category">Observability</div>
+        <div class="items">Observe (OPAL) · Datadog · Splunk · OpenTelemetry · CloudZero</div>
+      </div>
+      <div class="stack-group">
+        <div class="category">Languages</div>
+        <div class="items">Go · Python · Ruby · Bash · Node.js · SQL</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Links</h2>
+    <div class="footer-links">
+      <a href="/resume.html">Full Resume</a>
+      <a href="https://github.com/Cdub-63" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+      <a href="https://linkedin.com/in/christian-wallace-782902124" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

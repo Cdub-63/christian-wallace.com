@@ -1,0 +1,295 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: site-html
+  namespace: default
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Christian D Wallace</title>
+      <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+          background: #f8fafc;
+          color: #0f172a;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+        .container { max-width: 560px; width: 100%; text-align: center; }
+        h1 { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+        .title { font-size: 1rem; color: #475569; margin-bottom: 0.25rem; }
+        .location { font-size: 0.875rem; color: #94a3b8; margin-bottom: 2.5rem; }
+        .divider { width: 36px; height: 2px; background: #1d4ed8; margin: 0 auto 2.5rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
+        .card {
+          display: flex; flex-direction: column; align-items: center;
+          padding: 1.5rem 1rem; background: #ffffff;
+          border: 1px solid #e2e8f0; border-radius: 8px;
+          text-decoration: none; color: #0f172a;
+          transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .card:hover { border-color: #1d4ed8; box-shadow: 0 0 0 3px rgba(29,78,216,0.08); }
+        .card-label { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .card-sub { font-size: 0.8rem; color: #94a3b8; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Christian D Wallace</h1>
+        <p class="title">Senior Platform &amp; Site Reliability Engineer</p>
+        <p class="location">Chicago, IL</p>
+        <div class="divider"></div>
+        <div class="grid">
+          <a href="/engineering.html" class="card">
+            <span class="card-label">Engineering</span>
+            <span class="card-sub">Background &amp; work</span>
+          </a>
+          <a href="/resume.html" class="card">
+            <span class="card-label">Resume</span>
+            <span class="card-sub">Full CV</span>
+          </a>
+          <a href="https://github.com/Cdub-63" class="card" target="_blank" rel="noopener noreferrer">
+            <span class="card-label">GitHub</span>
+            <span class="card-sub">Cdub-63 &#8599;</span>
+          </a>
+          <a href="https://linkedin.com/in/christian-wallace-782902124" class="card" target="_blank" rel="noopener noreferrer">
+            <span class="card-label">LinkedIn</span>
+            <span class="card-sub">Connect &#8599;</span>
+          </a>
+        </div>
+      </div>
+    </body>
+    </html>
+  engineering.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Engineering - Christian D Wallace</title>
+      <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; background: #f8fafc; color: #0f172a; line-height: 1.6; }
+        a { color: #1d4ed8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        nav { padding: 1.25rem 2rem; border-bottom: 1px solid #e2e8f0; background: #ffffff; }
+        nav a { font-size: 0.875rem; color: #475569; }
+        nav a:hover { color: #0f172a; text-decoration: none; }
+        .page { max-width: 720px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+        .hero h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 0.4rem; }
+        .hero .subtitle { font-size: 1rem; color: #475569; margin-bottom: 1.5rem; }
+        .hero p { font-size: 0.975rem; color: #334155; max-width: 640px; }
+        .divider { width: 36px; height: 2px; background: #1d4ed8; margin: 2.5rem 0; }
+        section { margin-bottom: 3rem; }
+        h2 { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 1.25rem; }
+        .highlight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .highlight-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1.25rem; }
+        .highlight-card .stat { font-size: 1.6rem; font-weight: 700; color: #1d4ed8; letter-spacing: -0.02em; line-height: 1; margin-bottom: 0.3rem; }
+        .highlight-card .desc { font-size: 0.825rem; color: #475569; }
+        .work-item { display: flex; gap: 1.25rem; margin-bottom: 1.75rem; }
+        .work-item:last-child { margin-bottom: 0; }
+        .work-dot { flex-shrink: 0; width: 8px; height: 8px; background: #1d4ed8; border-radius: 50%; margin-top: 0.45rem; }
+        .work-item h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+        .work-item p { font-size: 0.85rem; color: #475569; }
+        .stack-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
+        .stack-group { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 1rem; }
+        .stack-group .category { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #94a3b8; margin-bottom: 0.5rem; }
+        .stack-group .items { font-size: 0.825rem; color: #334155; line-height: 1.7; }
+        .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .footer-links a { font-size: 0.875rem; font-weight: 500; color: #1d4ed8; }
+        @media (max-width: 560px) { .highlight-grid { grid-template-columns: 1fr; } }
+      </style>
+    </head>
+    <body>
+    <nav><a href="/">&#8592; Home</a></nav>
+    <div class="page">
+      <div class="hero">
+        <h1>Christian D Wallace</h1>
+        <p class="subtitle">Senior Platform &amp; Site Reliability Engineer &mdash; Chicago, IL</p>
+        <p>10 years bridging production networking and cloud infrastructure at scale. Currently architecting Instructure's multi-region EKS platform that powers Canvas LMS for tens of millions of learners worldwide. I combine deep networking foundations with modern platform engineering &mdash; and I own migrations end-to-end.</p>
+      </div>
+      <div class="divider"></div>
+      <section>
+        <h2>By the numbers</h2>
+        <div class="highlight-grid">
+          <div class="highlight-card"><div class="stat">40</div><div class="desc">EKS clusters across 8 production AWS regions</div></div>
+          <div class="highlight-card"><div class="stat">433</div><div class="desc">Active service deployments on ArgoCD GitOps</div></div>
+          <div class="highlight-card"><div class="stat">34</div><div class="desc">Transit Gateways migrated across 9 regions with zero customer impact</div></div>
+          <div class="highlight-card"><div class="stat">60%</div><div class="desc">Bandwidth reduction via VPN split-tunneling at Trevipay</div></div>
+        </div>
+      </section>
+      <section>
+        <h2>What I've shipped</h2>
+        <div class="work-item">
+          <div class="work-dot"></div>
+          <div>
+            <h3>Internal Developer Platform at Instructure</h3>
+            <p>Built and scaled "Trigger" &mdash; the platform powering Canvas LMS deployments. Helm/Kustomize manifests, Kyverno policy-as-code, Akuity-managed ArgoCD GitOps. Led migration of production workloads off legacy Cloudgate/Condor PaaS onto a Node.js/Express + MongoDB deployment API.</p>
+          </div>
+        </div>
+        <div class="work-item">
+          <div class="work-dot"></div>
+          <div>
+            <h3>Company-wide Zero-Trust Access Modernization</h3>
+            <p>Phased AppGate ZTNA rollout replacing Teleport and standalone SSH keys for the entire engineering org. Wired ArgoCD prod Okta SSO via SCIM and rotated IAM Identity Center SCIM tokens across multi-account AWS Organizations.</p>
+          </div>
+        </div>
+        <div class="work-item">
+          <div class="work-dot"></div>
+          <div>
+            <h3>AWS Transit Gateway Mesh Migration</h3>
+            <p>Migrated two parallel TGW meshes off VyOS-on-EC2, then led a fleet-wide security-group referencing rollout across 34 TGWs in 9 regions &mdash; eliminating thousands of CIDR-based rules. Authored reusable Terraform modules and orchestrated Terraform Cloud workspace applies at scale.</p>
+          </div>
+        </div>
+        <div class="work-item">
+          <div class="work-dot"></div>
+          <div>
+            <h3>FinOps &amp; Cloud Security Tooling</h3>
+            <p>CrowdStrike CSPM across 9 AWS accounts, AWS Config continuous-mode StackSets org-wide, CloudZero cost-attribution labels across the EKS fleet, and WAF tuning during an active post-compromise investigation.</p>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h2>Technical stack</h2>
+        <div class="stack-grid">
+          <div class="stack-group"><div class="category">Cloud / AWS</div><div class="items">EKS &middot; Transit Gateway &middot; IAM Identity Center &middot; LZA &middot; VPC/IPAM &middot; CloudFront &middot; WAFv2</div></div>
+          <div class="stack-group"><div class="category">Platform</div><div class="items">Kubernetes &middot; ArgoCD &middot; Helm &middot; Kustomize &middot; Kyverno &middot; Akuity</div></div>
+          <div class="stack-group"><div class="category">IaC &amp; CI/CD</div><div class="items">Terraform &middot; Terraform Cloud &middot; Ansible &middot; GitHub Actions &middot; Jenkins</div></div>
+          <div class="stack-group"><div class="category">Security</div><div class="items">Zero-Trust &middot; AppGate ZTNA &middot; Okta SSO/SCIM &middot; Vault &middot; CrowdStrike CSPM &middot; Wiz</div></div>
+          <div class="stack-group"><div class="category">Networking</div><div class="items">BGP &middot; IPsec &middot; SD-WAN &middot; Cisco ACI &middot; AWS TGW</div></div>
+          <div class="stack-group"><div class="category">Observability</div><div class="items">Observe (OPAL) &middot; Datadog &middot; Splunk &middot; OpenTelemetry &middot; CloudZero</div></div>
+          <div class="stack-group"><div class="category">Languages</div><div class="items">Go &middot; Python &middot; Ruby &middot; Bash &middot; Node.js &middot; SQL</div></div>
+        </div>
+      </section>
+      <section>
+        <h2>Links</h2>
+        <div class="footer-links">
+          <a href="/resume.html">Full Resume</a>
+          <a href="https://github.com/Cdub-63" target="_blank" rel="noopener noreferrer">GitHub &#8599;</a>
+          <a href="https://linkedin.com/in/christian-wallace-782902124" target="_blank" rel="noopener noreferrer">LinkedIn &#8599;</a>
+        </div>
+      </section>
+    </div>
+    </body>
+    </html>
+  resume.html: |
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christian D Wallace - Resume</title>
+    <style>
+      @page { size: Letter; margin: 0.4in; }
+      * { box-sizing: border-box; }
+      html, body { font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 9.5pt; line-height: 1.2; color: #111; margin: 0; padding: 0; }
+      body { max-width: 7.5in; margin: 0 auto; padding: 0.35in 0.4in 0.25in 0.4in; }
+      .screen-nav { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0 1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #e2e8f0; font-size: 9pt; }
+      .screen-nav a { color: #1d4ed8; text-decoration: none; }
+      .screen-nav a:hover { text-decoration: underline; }
+      .screen-nav button { font-size: 8.5pt; padding: 0.3rem 0.75rem; background: #1d4ed8; color: white; border: none; border-radius: 4px; cursor: pointer; }
+      .screen-nav button:hover { background: #1e40af; }
+      @media print { .screen-nav { display: none; } }
+      h1 { font-size: 17pt; text-align: center; margin: 0 0 1pt 0; font-weight: 700; letter-spacing: 0.2pt; }
+      .contact { text-align: center; font-size: 8.5pt; margin-bottom: 4pt; color: #333; }
+      .contact a { color: #1155cc; text-decoration: none; }
+      h2 { font-size: 10pt; text-transform: uppercase; letter-spacing: 0.6pt; border-bottom: 1px solid #222; margin: 6pt 0 2pt 0; padding-bottom: 1pt; font-weight: 700; }
+      .job-header { display: flex; justify-content: space-between; align-items: baseline; margin-top: 3pt; }
+      .job-header .left { font-weight: 700; font-size: 9.75pt; }
+      .job-header .right { font-size: 9pt; color: #444; font-style: italic; }
+      .role { font-size: 9pt; font-style: italic; color: #333; margin-bottom: 1pt; }
+      ul { margin: 0 0 2pt 0; padding-left: 14pt; page-break-inside: avoid; }
+      li { margin: 1pt 0; line-height: 1.22; }
+      .footer-block { font-size: 9pt; margin-top: 1pt; }
+      .footer-block p { margin: 1.5pt 0; }
+      strong { font-weight: 600; }
+      .job-block { page-break-inside: avoid; }
+      .profile { font-size: 9.5pt; line-height: 1.3; margin-top: 2pt; text-align: justify; }
+      .profile strong { font-weight: 700; }
+    </style>
+    </head>
+    <body>
+    <div class="screen-nav">
+      <a href="/">&#8592; Home</a>
+      <button onclick="window.print()">Print / Save as PDF</button>
+    </div>
+    <h1>Christian D Wallace</h1>
+    <div class="contact">
+      <a href="mailto:christian.wallace63@gmail.com">christian.wallace63@gmail.com</a>
+      &nbsp;|&nbsp; 918-313-6647
+      &nbsp;|&nbsp; <a href="https://linkedin.com/in/christian-wallace-782902124">linkedin.com/in/christian-wallace-782902124</a>
+      &nbsp;|&nbsp; Chicago, IL
+    </div>
+    <h2>Profile</h2>
+    <p class="profile"><strong>Senior Platform &amp; Site Reliability Engineer</strong> with 10 years bridging production networking and cloud infrastructure at scale. Currently architecting Instructure's multi-region EKS platform that powers <strong>Canvas LMS for tens of millions of learners worldwide</strong>. Combine deep networking foundations (BGP, IPsec, Cisco ACI, SD-WAN, AWS Transit Gateway mesh design) with modern platform engineering (Kubernetes, GitOps, FinOps, Zero-Trust ZTNA, policy-as-code). Known for owning multi-region migrations end-to-end and building the reusable IaC modules other teams ship on top of.</p>
+    <h2>Work Experience</h2>
+    <div class="job-header"><div class="left">Instructure, Salt Lake City</div><div class="right">Apr 2021 &ndash; Present</div></div>
+    <div class="role">Senior Site Reliability Engineer / Platform Engineer</div>
+    <ul>
+      <li>Build and scale Instructure's internal developer platform ("Trigger") that powers Canvas LMS &mdash; <strong>40 EKS clusters across 8 production AWS regions, 42 deployment groups, and 433 active service deployments</strong> on Akuity-managed ArgoCD GitOps, with Helm/Kustomize manifests and Kyverno policy-as-code; shipped new regional clusters and led migration of production workloads off the legacy Cloudgate/Condor PaaS onto a Node.js/Express + MongoDB deployment API</li>
+      <li>Architected and delivered the migration of two parallel <strong>AWS Transit Gateway meshes off VyOS-on-EC2</strong>, then led a <strong>fleet-wide TGW security-group referencing rollout across 34 TGWs in 9 regions with zero customer impact</strong>, eliminating thousands of CIDR-based rules; authored reusable TGW Terraform modules and orchestrated CLI-driven workspace applies across Terraform Cloud</li>
+      <li>Led <strong>company-wide Zero-Trust access modernization</strong>: phased AppGate ZTNA rollout replacing Teleport + standalone SSH keys for the entire engineering org, ArgoCD prod Okta SSO via SCIM, and IAM Identity Center SCIM token rotation across multi-account AWS Organizations</li>
+      <li>Designed and deployed <strong>org-wide cloud security and FinOps tooling</strong>: CrowdStrike CSPM across 9 AWS accounts, AWS Config continuous-mode StackSets recording WAFv2/CloudFront/ELBv2 org-wide, CloudZero cost-attribution labels across the EKS fleet, and incident-response AWS WAF tuning during an active post-compromise investigation</li>
+      <li>Led the <strong>observability migration from Datadog to Observe</strong> (OPAL queries, dashboards, alerting) and modernized the Gerrit source-control fleet (NoteDb schema upgrade 3.6.8 &rarr; 3.7.8, Classic ELB &rarr; NLB+ALB+WAF cutover); shipped Go/Ruby/Python tooling that measurably cut developer deployment toil and cycle time</li>
+      <li>Architected network and IAM for new AWS LZA accounts and regions end-to-end (planning &rarr; IPAM &rarr; routing &rarr; production); built the group-based AD/Okta access model used by every engineering team across AWS, ArgoCD, Datadog, Vault, and 1Password</li>
+    </ul>
+    <div class="job-block">
+      <div class="job-header"><div class="left">Chicago Elite Fitness, Chicago</div><div class="right">Nov 2025 &ndash; Present</div></div>
+      <div class="role">Coach</div>
+      <ul>
+        <li>Coach and mentor groups of 15&ndash;20 athletes in a live performance setting &mdash; building communication, adaptive teaching, and on-the-fly decision-making skills that translate directly to leading engineering teams and stakeholder meetings</li>
+        <li>Provide individualized coaching and form correction, building strong client relationships and fostering a community that drives retention and referrals</li>
+      </ul>
+    </div>
+    <div class="job-block">
+      <div class="job-header"><div class="left">Trevipay, Overland Park</div><div class="right">Mar 2020 &ndash; Apr 2021</div></div>
+      <div class="role">Network Engineer</div>
+      <ul>
+        <li>Engineered Cisco ASA 5508 AnyConnect VPN split-tunneling during the COVID-19 remote-work transition, <strong>cutting corporate bandwidth utilization by 60%</strong> overnight and keeping a fully remote financial-services workforce productive from day one of lockdown</li>
+        <li>Built centralized network configuration and change-management automation &mdash; NetBrain for design and drift detection, RANCID for nightly config tracking, NetBox for IPAM, and Cisco ACI for data-center fabric policy &mdash; an early forcing function for treating network state as declarative, version-controlled config</li>
+      </ul>
+    </div>
+    <div class="job-block">
+      <div class="job-header"><div class="left">Lucet, Kansas City</div><div class="right">Oct 2018 &ndash; Mar 2020</div></div>
+      <div class="role">Network Engineer I</div>
+      <ul>
+        <li>Led migration of <strong>30+ customer Site-to-Site IPsec VPN tunnels</strong> from Dell SonicWall to Cisco ASA 5525 for a behavioral-health managed-care client base, coordinating cutover windows, routing changes, and policy translation with external engineering teams across multiple customer environments &mdash; direct precursor to the AWS Transit Gateway mesh-migration work I lead today</li>
+        <li>Delivered full headquarters network build-out &mdash; physical-layer upgrades, licensing, structured cabling, out-of-band management &mdash; supporting Cisco SD-WAN and Meraki deployments</li>
+      </ul>
+    </div>
+    <div class="job-block">
+      <div class="job-header"><div class="left">Cerner, Kansas City</div><div class="right">June 2016 &ndash; Oct 2018</div></div>
+      <div class="role">Technical Solutions Analyst</div>
+      <ul>
+        <li>Owned <strong>tier-3 production incident response</strong> for a 24/7 mission-critical EHR platform serving healthcare providers nationwide, root-causing outages affecting clinician access to patient records and translating complex failure modes into clear remediation steps for non-technical clinical staff</li>
+        <li>Hands-on Linux administration, SQL debugging, and production incident response on workloads where downtime had direct patient-care impact &mdash; built the operational instincts for treating infrastructure failures with the same urgency as a clinical emergency</li>
+      </ul>
+    </div>
+    <h2>Education</h2>
+    <div class="job-header">
+      <div class="left">The University of Tulsa &mdash; B.S. Computer Information Systems</div>
+      <div class="right">June 2012 &ndash; May 2016</div>
+    </div>
+    <h2>Additional</h2>
+    <div class="footer-block">
+      <p><strong>Technical Skills &mdash; Cloud / AWS:</strong> Multi-account AWS Organizations, Landing Zone Accelerator (LZA), IAM Identity Center, Transit Gateway, VPC/IPAM, Route53, EKS, ECR, KMS, CloudFront, WAFv2, Config, StackSets, Lambda, multi-region high-availability</p>
+      <p><strong>Platform &amp; Reliability Engineering:</strong> Internal Developer Platforms (IDP), Kubernetes at scale (40+ EKS clusters), Helm, Kustomize, ArgoCD/Akuity, Kyverno policy-as-code, deployment APIs, on-call &amp; production incident response</p>
+      <p><strong>IaC &amp; CI/CD:</strong> Terraform + Terraform Cloud, Ansible, Ruby (Cloudgate), ArgoCD GitOps, Jenkins, GitHub Actions, Gerrit, pre-commit, reusable module design</p>
+      <p><strong>Networking:</strong> AWS Transit Gateway (SG referencing, mesh design), BGP, IPsec, Site-to-Site VPN, SD-WAN, Cisco ACI, AppGate ZTNA, multi-region routing</p>
+      <p><strong>Security:</strong> Zero-Trust access, CrowdStrike CSPM, Wiz, HashiCorp Vault, Okta SSO/SCIM, AWS WAFv2, AWS Config (continuous recording, multi-region StackSets), incident response</p>
+      <p><strong>Observability &amp; FinOps:</strong> Observe (OPAL), Datadog, Splunk, Sentry, OpenTelemetry, CloudZero cost attribution</p>
+      <p><strong>Languages:</strong> Go, Python, Ruby, Bash, Node.js, SQL</p>
+      <p><strong>Certifications:</strong> AWS Certified Solutions Architect &ndash; Associate (SAA), Cisco Certified Network Professional (CCNP), Cisco Certified Network Associate (CCNA), ISSA Certified Personal Trainer (CPT), CrossFit Level 1 Trainer (CF-L1)</p>
+      <p><strong>Activities:</strong> D1 Collegiate Football Athlete &mdash; Offensive Guard, KC Pet Project &mdash; Volunteer</p>
+    </div>
+    </body>
+    </html>

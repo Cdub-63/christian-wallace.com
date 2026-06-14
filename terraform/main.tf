@@ -37,6 +37,15 @@ resource "cloudflare_record" "www" {
   proxied = false
 }
 
+resource "cloudflare_record" "argocd" {
+  zone_id = var.cloudflare_zone_id
+  name    = "argocd"
+  type    = "A"
+  content = hcloud_server.k3s.ipv4_address
+  ttl     = 1
+  proxied = false
+}
+
 resource "hcloud_ssh_key" "default" {
   name       = "christian-mac"
   public_key = file("~/.ssh/id_ed25519.pub")
