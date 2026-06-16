@@ -6,6 +6,8 @@ on:
     paths:
       - 'site/**'
       - 'Dockerfile'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   build-push:
