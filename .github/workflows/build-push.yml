@@ -13,7 +13,7 @@ jobs:
   build-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
@@ -34,3 +34,12 @@ jobs:
           tags: |
             ghcr.io/cdub-63/christian-wallace-site:latest
             ghcr.io/cdub-63/christian-wallace-site:${{ github.sha }}
+
+      - name: Update deployment manifest
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          sed -i "s|image: ghcr.io/cdub-63/christian-wallace-site:.*|image: ghcr.io/cdub-63/christian-wallace-site:${{ github.sha }}|" manifests/site/deployment.yaml
+          git add manifests/site/deployment.yaml
+          git commit -m "ci: deploy site image ${{ github.sha }}"
+          git push
