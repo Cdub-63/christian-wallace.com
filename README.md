@@ -13,7 +13,9 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more — deployed v
 | **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
 | **TLS** | cert-manager + Let's Encrypt | Automatic certificate management |
 | **GitOps** | ArgoCD | Declarative, Git-driven deployments |
-| **CI/CD** | GitHub Actions | Build and push on merge to main |
+| **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
+| **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
+| **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
 | **Observability** | Prometheus + Grafana | Metrics and dashboards (Month 2) |
 
 ## Infrastructure Diagram
@@ -23,6 +25,8 @@ graph TB
     User([User / Browser])
     CF[Cloudflare DNS<br/>christian-wallace.com]
     GH[GitHub<br/>Cdub-63/christian-wallace.com]
+    Actions[GitHub Actions<br/>Build + Push]
+    GHCR[GHCR<br/>ghcr.io/cdub-63/christian-wallace-site]
 
     subgraph Hetzner ["Hetzner CPX21 — Ashburn, VA (87.99.148.36)"]
         subgraph k3s ["k3s Cluster"]
@@ -37,7 +41,7 @@ graph TB
             end
 
             subgraph site-ns ["namespace: default"]
-                Site[Site Pod<br/>nginx + HTML]
+                Site[Site Pod<br/>nginx:alpine + HTML]
             end
         end
     end
@@ -47,8 +51,11 @@ graph TB
     User -->|HTTPS| CF
     CF -->|A record → 87.99.148.36| Traefik
     Traefik --> Site
-    GH -->|webhook| ArgoCD
+    GH -->|push triggers| Actions
+    Actions -->|docker push| GHCR
+    GH -->|polls for changes| ArgoCD
     ArgoCD -->|reconcile manifests| Site
+    GHCR -->|pull image| Site
     CertManager <-->|ACME challenge| LE
     CertManager -->|TLS cert| Traefik
 ```
@@ -75,10 +82,14 @@ Installing cert-manager without Helm means finding the right GitHub release, dow
 **Without ArgoCD:**
 Deploying a change means SSHing into the server, or running `kubectl apply` from your laptop with the right kubeconfig. If you change something manually and it breaks, there's no easy rollback and no record of what changed. With ArgoCD, the cluster watches your GitHub repo — push a commit, the cluster reconciles itself to match. Rollback is `git revert`.
 
+**Without Docker + GitHub Actions:**
+Updating the site meant cramming all the HTML into a Kubernetes ConfigMap (a 600-line YAML file), committing that generated file, and pushing. With a Dockerfile, the HTML is baked into a self-contained image at build time. GitHub Actions builds and pushes that image to GHCR automatically on every push — no manual steps, no generated files in version control.
+
 ## Repository Layout
 
 ```
 christian-wallace.com/
+├── Dockerfile          # nginx:alpine image with site/ baked in
 ├── terraform/          # Hetzner server + firewall provisioning
 │   ├── main.tf
 │   ├── variables.tf
@@ -88,7 +99,7 @@ christian-wallace.com/
 │   ├── cert-manager/
 │   └── site/
 ├── site/               # HTML/CSS source for the website
-└── .github/workflows/  # CI/CD (coming Month 2)
+└── .github/workflows/  # GitHub Actions — build + push to GHCR
 ```
 
 ## Local Setup
