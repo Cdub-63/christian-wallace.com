@@ -15,13 +15,6 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: nginx:alpine
+          image: ghcr.io/cdub-63/christian-wallace-site:latest
           ports:
             - containerPort: 80
-          volumeMounts:
-            - name: html
-              mountPath: /usr/share/nginx/html
-      volumes:
-        - name: html
-          configMap:
-            name: site-html
