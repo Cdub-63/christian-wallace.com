@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: ghcr.io/cdub-63/christian-wallace-site:bc104e301b755c60e8e3fb9647ea622554e00f77
+          image: ghcr.io/cdub-63/christian-wallace-site:53431833e0185c49e6d0827abfa9451d24f7be79
           ports:
             - containerPort: 80
