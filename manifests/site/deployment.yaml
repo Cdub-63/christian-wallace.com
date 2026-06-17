@@ -4,7 +4,6 @@ metadata:
   name: site
   namespace: default
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: site
@@ -20,3 +19,10 @@ spec:
           image: ghcr.io/cdub-63/christian-wallace-site:838aed349f4b89d7c3a83f6918db209f7a77a0cd
           ports:
             - containerPort: 80
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
