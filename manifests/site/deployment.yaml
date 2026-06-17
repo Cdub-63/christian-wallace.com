@@ -13,6 +13,8 @@ spec:
       labels:
         app: site
     spec:
+      serviceAccountName: site
+      automountServiceAccountToken: false
       containers:
         - name: nginx
           image: ghcr.io/cdub-63/christian-wallace-site:838aed349f4b89d7c3a83f6918db209f7a77a0cd
