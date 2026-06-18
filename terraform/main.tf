@@ -46,6 +46,15 @@ resource "cloudflare_record" "argocd" {
   proxied = false
 }
 
+resource "cloudflare_record" "grafana" {
+  zone_id = var.cloudflare_zone_id
+  name    = "grafana"
+  type    = "A"
+  content = hcloud_server.k3s.ipv4_address
+  ttl     = 1
+  proxied = false
+}
+
 resource "hcloud_ssh_key" "default" {
   name       = "christian-mac"
   public_key = file("~/.ssh/id_ed25519.pub")
@@ -86,7 +95,7 @@ resource "hcloud_firewall" "k3s" {
 resource "hcloud_server" "k3s" {
   name        = "k3s-node-1"
   image       = "ubuntu-24.04"
-  server_type = "cpx21"
+  server_type = "cpx31"
   location    = "ash"
   ssh_keys    = [hcloud_ssh_key.default.id]
   firewall_ids = [hcloud_firewall.k3s.id]

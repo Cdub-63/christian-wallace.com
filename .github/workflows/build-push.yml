@@ -40,6 +40,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           sed -i "s|image: ghcr.io/cdub-63/christian-wallace-site:.*|image: ghcr.io/cdub-63/christian-wallace-site:${{ github.sha }}|" manifests/site/deployment.yaml
+          sed -i "s|kubernetes.io/change-cause:.*|kubernetes.io/change-cause: \"${{ github.sha }}\"|" manifests/site/deployment.yaml
           git add manifests/site/deployment.yaml
           git commit -m "ci: deploy site image ${{ github.sha }}"
           git push

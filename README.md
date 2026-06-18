@@ -124,3 +124,19 @@ kubectl get pods -A
 k9s
 ```
 
+## Challenges & Lessons Learned
+
+Real issues hit during the build, documented here because they're the kind of thing tutorials skip.
+
+### ArgoCD autosync doesn't redeploy on new images
+
+ArgoCD syncs what's in Git — if the manifest hasn't changed, it does nothing. After wiring up the CI pipeline to build and push a new Docker image on every push, the site pods weren't updating. ArgoCD reported "Synced" because the deployment manifest in Git still had the old image tag.
+
+**Fix:** Added a `sed` step at the end of the GitHub Actions workflow to rewrite the image tag in `manifests/site/deployment.yaml` and commit it back. ArgoCD detects the Git change, syncs, and rolls out the new pod. The CI commit is what drives the deploy, not the image push.
+
+### kube-prometheus-stack OOM'd the node
+
+Installing `kube-prometheus-stack` (Prometheus + Grafana + Alertmanager + exporters) on a Hetzner CPX21 (3 vCPU, 4 GB RAM) killed the node. k3s itself was already consuming ~1.8 GB, leaving barely 2 GB for everything else. On startup, Prometheus alone spiked past what was available, the node hit 52 MB free, the embedded SQLite database started timing out on every query, and the API server became unreachable.
+
+**Fix:** Upgraded the node to CPX31 (4 vCPU, 8 GB RAM) via a one-line change to `server_type` in Terraform. Hetzner resizes in-place — same IP, data preserved, ~90 seconds of downtime.
+
