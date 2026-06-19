@@ -9,3 +9,8 @@ terraform/terraform.tfvars.local
 *.pem
 *.key
 kubeconfig
+
+# Claude Code — downloaded skills (regeneratable from skills-lock.json)
+.agents/
+.claude/skills/
+.claude/settings.local.json
