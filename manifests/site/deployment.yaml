@@ -16,14 +16,36 @@ spec:
     spec:
       serviceAccountName: site
       automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: nginx
           image: ghcr.io/cdub-63/christian-wallace-site:50a7ab3f6f3ffea035f24544f2a90cef19a26a7a
           ports:
-            - containerPort: 80
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           resources:
             requests:
               cpu: 10m
               memory: 32Mi
             limits:
               memory: 64Mi
+          volumeMounts:
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: cache
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
