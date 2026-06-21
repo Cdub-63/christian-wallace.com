@@ -141,6 +141,12 @@ Setting `runAsNonRoot: true` on the pod is only the start. nginx:alpine's defaul
 
 **Fix:** Three changes together make it work. First, a custom `nginx.conf` that moves the PID file to `/tmp/nginx.pid` and redirects all five temp path directives (`client_body_temp_path`, `proxy_temp_path`, etc.) to `/tmp`. Second, a custom `default.conf` that listens on `8080` instead of `80`. Third, two `emptyDir` volumes mounted at `/var/cache/nginx` and `/tmp` so those paths are writable at runtime. The Service `targetPort` and NetworkPolicy ingress port also need updating to `8080` — updating the pod port without touching those leaves traffic silently dead.
 
+### Grafana password silently rotated on every ArgoCD sync
+
+After installing kube-prometheus-stack, Grafana login stopped working after the next ArgoCD sync. The chart generates a random admin password on install and stores it in a Secret. On upgrades it uses Helm's `lookup` function to reuse the existing value — but ArgoCD renders Helm templates offline (`helm template`), so `lookup` always returns nothing and a new random password is written to the Secret on every sync. Grafana's SQLite DB still had the old password. They drifted silently, login broke.
+
+**Fix:** Add `grafana.admin.existingSecret` in the ArgoCD Helm values pointing to the auto-created secret by name. This tells Helm to leave the secret alone — no more rotation on sync. Set the password once with `grafana cli admin reset-admin-password`, patch the secret to match, and it stays in sync permanently. Pin `targetRevision` to a specific chart version so you control when upgrades happen rather than auto-upgrading to latest on every sync.
+
 ### kube-prometheus-stack OOM'd the node
 
 Installing `kube-prometheus-stack` (Prometheus + Grafana + Alertmanager + exporters) on a Hetzner CPX21 (3 vCPU, 4 GB RAM) killed the node. k3s itself was already consuming ~1.8 GB, leaving barely 2 GB for everything else. On startup, Prometheus alone spiked past what was available, the node hit 52 MB free, the embedded SQLite database started timing out on every query, and the API server became unreachable.
