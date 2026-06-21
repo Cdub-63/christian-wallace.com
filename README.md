@@ -17,6 +17,7 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more — deployed v
 | **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
 | **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
 | **Observability** | Prometheus + Grafana | Metrics and dashboards (Month 2) |
+| **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
 | **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
 
 ## Infrastructure Diagram
