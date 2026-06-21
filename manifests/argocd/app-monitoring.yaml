@@ -32,6 +32,10 @@ spec:
                 memory: 512Mi
 
         grafana:
+          persistence:
+            enabled: true
+            size: 1Gi
+            storageClassName: local-path
           admin:
             existingSecret: kube-prometheus-stack-grafana
             userKey: admin-user
