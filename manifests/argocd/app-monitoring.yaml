@@ -32,6 +32,10 @@ spec:
                 memory: 512Mi
 
         grafana:
+          admin:
+            existingSecret: kube-prometheus-stack-grafana
+            userKey: admin-user
+            passwordKey: admin-password
           ingress:
             enabled: true
             ingressClassName: traefik
