@@ -148,10 +148,6 @@ After installing kube-prometheus-stack, Grafana login stopped working after the 
 
 **Fix:** Add `grafana.admin.existingSecret` in the ArgoCD Helm values pointing to the auto-created secret by name. This tells Helm to leave the secret alone — no more rotation on sync. To recover, run `grafana cli admin reset-admin-password` inside the pod, then patch the secret to match. Also enable `grafana.persistence` with a PVC so Grafana's SQLite DB survives pod restarts — without it, the DB is wiped on every restart and re-initialized from the secret, meaning the secret and whatever you set in the UI can drift. With persistence, the DB is the source of truth and you only need to change the password in the UI.
 
-### Courses teach Kubernetes concepts, a real cluster teaches Kubernetes
-
-Following tutorials gives you a working mental model but abstracts away the sharp edges — you never hit the ArgoCD + Helm `lookup` issue in a course because the chart version is pinned and the problem never surfaces. Running a real cluster means hitting real failures in real order: a login breaks, you trace it through logs, secrets, Helm rendering behavior, and Grafana's auth internals, and come out understanding each layer deeply. The pain points aren't bugs in the learning process — they are the learning process.
-
 ### kube-prometheus-stack OOM'd the node
 
 Installing `kube-prometheus-stack` (Prometheus + Grafana + Alertmanager + exporters) on a Hetzner CPX21 (3 vCPU, 4 GB RAM) killed the node. k3s itself was already consuming ~1.8 GB, leaving barely 2 GB for everything else. On startup, Prometheus alone spiked past what was available, the node hit 52 MB free, the embedded SQLite database started timing out on every query, and the API server became unreachable.
