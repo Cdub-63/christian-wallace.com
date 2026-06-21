@@ -146,7 +146,7 @@ Setting `runAsNonRoot: true` on the pod is only the start. nginx:alpine's defaul
 
 After installing kube-prometheus-stack, Grafana login stopped working after the next ArgoCD sync. The chart generates a random admin password on install and stores it in a Secret. On upgrades it uses Helm's `lookup` function to reuse the existing value — but ArgoCD renders Helm templates offline (`helm template`), so `lookup` always returns nothing and a new random password is written to the Secret on every sync. Grafana's SQLite DB still had the old password. They drifted silently, login broke.
 
-**Fix:** Add `grafana.admin.existingSecret` in the ArgoCD Helm values pointing to the auto-created secret by name. This tells Helm to leave the secret alone — no more rotation on sync. Set the password once with `grafana cli admin reset-admin-password`, patch the secret to match, and it stays in sync permanently. Pin `targetRevision` to a specific chart version so you control when upgrades happen rather than auto-upgrading to latest on every sync.
+**Fix:** Add `grafana.admin.existingSecret` in the ArgoCD Helm values pointing to the auto-created secret by name. This tells Helm to leave the secret alone — no more rotation on sync. To recover, run `grafana cli admin reset-admin-password` inside the pod, then patch the secret to match. Also enable `grafana.persistence` with a PVC so Grafana's SQLite DB survives pod restarts — without it, the DB is wiped on every restart and re-initialized from the secret, meaning the secret and whatever you set in the UI can drift. With persistence, the DB is the source of truth and you only need to change the password in the UI.
 
 ### kube-prometheus-stack OOM'd the node
 
