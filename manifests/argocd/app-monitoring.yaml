@@ -37,7 +37,7 @@ spec:
             size: 1Gi
             storageClassName: local-path
           admin:
-            existingSecret: kube-prometheus-stack-grafana
+            existingSecret: grafana-admin-creds
             userKey: admin-user
             passwordKey: admin-password
           ingress:
