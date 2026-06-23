@@ -13,6 +13,7 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more — deployed v
 | **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
 | **TLS** | cert-manager + Let's Encrypt | Automatic certificate management |
 | **GitOps** | ArgoCD | Declarative, Git-driven deployments |
+| **GitOps (app-of-apps)** | ArgoCD root Application | Watches `manifests/argocd/` so Application manifest changes deploy automatically on push |
 | **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
 | **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
 | **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
@@ -147,6 +148,14 @@ Setting `runAsNonRoot: true` on the pod is only the start. nginx:alpine's defaul
 After installing kube-prometheus-stack, Grafana login stopped working after the next ArgoCD sync. The chart generates a random admin password on install and stores it in a Secret. On upgrades it uses Helm's `lookup` function to reuse the existing value — but ArgoCD renders Helm templates offline (`helm template`), so `lookup` always returns nothing and a new random password is written to the Secret on every sync. Grafana's SQLite DB still had the old password. They drifted silently, login broke.
 
 **Fix:** Create a secret *outside* of Helm (`kubectl create secret generic grafana-admin-creds -n monitoring --from-literal=admin-user=admin --from-literal=admin-password=<pw>`), then set `grafana.admin.existingSecret: grafana-admin-creds` in the ArgoCD Helm values. The key is that the secret must not be owned by the Helm chart — ArgoCD can only rotate what it manages. Pointing `existingSecret` at the chart's own auto-created secret (`kube-prometheus-stack-grafana`) does not help; that secret is still re-rendered on every sync. Also enable `grafana.persistence` with a PVC so Grafana's SQLite DB survives pod restarts — without it the DB is wiped on restart and re-initialized from the secret, creating another drift vector. To recover access after drift: `kubectl exec ... -- /usr/share/grafana/bin/grafana cli admin reset-admin-password <pw>` inside the pod to align the DB with the secret.
+
+### ArgoCD doesn't manage its own Application manifests
+
+ArgoCD manages whatever its Application resources *point at* — Helm charts, directories of manifests, etc. But the Application resources themselves are just regular Kubernetes objects. Changes to files like `app-monitoring.yaml` in Git have no effect until something applies them to the cluster. Nothing does that automatically unless you wire it up.
+
+This caused three days of Grafana login failures. The fixes for password rotation (`existingSecret`) and DB persistence (PVC) were committed to git, but the ArgoCD Application resource in the cluster still had the old values. ArgoCD kept syncing the chart correctly — with the wrong values.
+
+**Fix:** App-of-apps pattern. A root ArgoCD Application (`manifests/argocd/root-app.yaml`) watches the `manifests/argocd/` directory and applies everything in it. Now any change to an Application manifest goes live on push — no manual `kubectl apply` needed. Bootstrapped once with `kubectl apply -f manifests/argocd/root-app.yaml`; after that, git is the only control plane.
 
 ### kube-prometheus-stack OOM'd the node
 
