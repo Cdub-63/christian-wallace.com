@@ -164,6 +164,12 @@ This caused three days of Grafana login failures. The fixes for password rotatio
 
 **Fix:** App-of-apps pattern. A root ArgoCD Application (`manifests/argocd/root-app.yaml`) watches the `manifests/argocd/` directory and applies everything in it. Now any change to an Application manifest goes live on push — no manual `kubectl apply` needed. Bootstrapped once with `kubectl apply -f manifests/argocd/root-app.yaml`; after that, git is the only control plane.
 
+### Replacing the CNI leaves surviving pods with broken networking
+
+When Cilium replaced Flannel, pods that were already running kept their old network namespace and eBPF endpoint state. They continued to crash-loop instead of recovering — Prometheus couldn't reach the Kubernetes API ClusterIP (`10.43.0.1`) and failed its startup probe on every restart. Deleting and recreating pods in the same namespace from a fresh alpine debug pod showed the network was fine; the problem was specific to the long-lived pods with stale state.
+
+**Fix:** After any CNI replacement, delete all running pods so they restart with a fresh network namespace and Cilium assigns them clean eBPF endpoint entries. Crash-loop restarting is not enough — the pod keeps the same namespace across restarts; only a full delete triggers namespace recreation.
+
 ### kube-prometheus-stack OOM'd the node
 
 Installing `kube-prometheus-stack` (Prometheus + Grafana + Alertmanager + exporters) on a Hetzner CPX21 (3 vCPU, 4 GB RAM) killed the node. k3s itself was already consuming ~1.8 GB, leaving barely 2 GB for everything else. On startup, Prometheus alone spiked past what was available, the node hit 52 MB free, the embedded SQLite database started timing out on every query, and the API server became unreachable.
