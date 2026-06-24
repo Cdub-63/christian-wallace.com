@@ -17,6 +17,7 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more — deployed v
 | **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
 | **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
 | **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
+| **CNI** | Cilium (eBPF) | Pod networking + NetworkPolicy enforcement; replaced Flannel which silently ignores NetworkPolicy |
 | **Observability** | Prometheus + Grafana | Metrics and dashboards (Month 2) |
 | **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
 | **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
@@ -148,6 +149,12 @@ Setting `runAsNonRoot: true` on the pod is only the start. nginx:alpine's defaul
 After installing kube-prometheus-stack, Grafana login stopped working after the next ArgoCD sync. The chart generates a random admin password on install and stores it in a Secret. On upgrades it uses Helm's `lookup` function to reuse the existing value — but ArgoCD renders Helm templates offline (`helm template`), so `lookup` always returns nothing and a new random password is written to the Secret on every sync. Grafana's SQLite DB still had the old password. They drifted silently, login broke.
 
 **Fix:** Create a secret *outside* of Helm (`kubectl create secret generic grafana-admin-creds -n monitoring --from-literal=admin-user=admin --from-literal=admin-password=<pw>`), then set `grafana.admin.existingSecret: grafana-admin-creds` in the ArgoCD Helm values. The key is that the secret must not be owned by the Helm chart — ArgoCD can only rotate what it manages. Pointing `existingSecret` at the chart's own auto-created secret (`kube-prometheus-stack-grafana`) does not help; that secret is still re-rendered on every sync. Also enable `grafana.persistence` with a PVC so Grafana's SQLite DB survives pod restarts — without it the DB is wiped on restart and re-initialized from the secret, creating another drift vector. To recover access after drift: `kubectl exec ... -- /usr/share/grafana/bin/grafana cli admin reset-admin-password <pw>` inside the pod to align the DB with the secret.
+
+### Flannel silently ignores NetworkPolicy
+
+Applying a NetworkPolicy with Flannel (k3s's default CNI) does nothing — Flannel handles pod routing but has no policy enforcement. The API server accepts the manifest and reports no errors. Traffic flows freely as if the policy doesn't exist. There is no warning.
+
+**Fix:** Replace Flannel with a CNI that enforces policy. Cilium (eBPF-based) is the modern choice — it replaces iptables chain lookups with O(1) kernel hash maps and adds Hubble for per-flow observability. Migration on a live k3s cluster: add `flannel-backend: none` and `disable-network-policy: true` to `/etc/rancher/k3s/config.yaml`, restart k3s, delete the stale `flannel.1` VXLAN interface (`ip link delete flannel.1`), install Cilium via Helm (`operator.replicas=1` for single-node), then cycle all pods to pick up new Cilium network interfaces. Cilium is a bootstrap dependency — it must exist before ArgoCD runs, so it needs one manual `helm install` on cluster creation; after that ArgoCD manages upgrades via `manifests/argocd/app-cilium.yaml`.
 
 ### ArgoCD doesn't manage its own Application manifests
 
