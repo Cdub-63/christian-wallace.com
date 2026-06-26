@@ -2,6 +2,13 @@
 
 Personal portfolio site — deployed via GitOps on k3s (Hetzner).
 
+## Access
+
+- **SSH:** `ssh k3s` (root@87.99.148.36)
+- **ArgoCD:** https://argocd.christian-wallace.com
+- **Grafana:** https://grafana.christian-wallace.com
+- **Site:** https://christian-wallace.com
+
 ## Stack
 
 - **Infra-as-code:** Terraform (hcloud + cloudflare providers) in `terraform/`
