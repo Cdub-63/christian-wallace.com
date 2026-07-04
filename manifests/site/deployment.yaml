@@ -4,7 +4,7 @@ metadata:
   name: site
   namespace: default
   annotations:
-    kubernetes.io/change-cause: "280bcda400aec76033f50a7f991acbb014e2050c"
+    kubernetes.io/change-cause: "f3fa4d49eea51285a76ca9869cc7818bca52b6bd"
 spec:
   selector:
     matchLabels:
@@ -24,7 +24,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: nginx
-          image: ghcr.io/cdub-63/christian-wallace-site:280bcda400aec76033f50a7f991acbb014e2050c
+          image: ghcr.io/cdub-63/christian-wallace-site:f3fa4d49eea51285a76ca9869cc7818bca52b6bd
           ports:
             - containerPort: 8080
           securityContext:
