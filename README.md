@@ -170,6 +170,14 @@ When Cilium replaced Flannel, pods that were already running kept their old netw
 
 **Fix:** After any CNI replacement, delete all running pods so they restart with a fresh network namespace and Cilium assigns them clean eBPF endpoint entries. Crash-loop restarting is not enough — the pod keeps the same namespace across restarts; only a full delete triggers namespace recreation.
 
+### The pod recycle sweep after that fix was still incomplete
+
+Ten days after the Cilium cutover, ArgoCD's sync status was stuck on `Unknown` and hadn't deployed anything new since. Cause: `argocd-application-controller-0` (a StatefulSet pod, 19 days old) had never been recycled — it still held a stale Flannel IP (`10.42.0.60`) and couldn't resolve `argocd-repo-server` via CoreDNS, because Cilium's eBPF service datapath had no `CiliumEndpoint` registered for it. A cluster-wide sweep for pods still on the old `10.42.0.0/16` CIDR turned up three more stragglers from the same cutover that were never caught: `metrics-server` (silently `0/1`, not actually serving), `local-path-provisioner`, and the `svclb-traefik` DaemonSet pod. None of these crash-looped loudly like Prometheus did, so they were missed.
+
+The lesson isn't "avoid CNI-swap downtime" — on a single-node cluster there's no second node to shift load to, so a short downtime window during cutover is basically unavoidable. Multi-node clusters can dodge it by cordoning and draining one node at a time, letting the scheduler recreate pods on nodes already migrated to the new CNI — but that's just controlled staggering of the same underlying requirement: every pod's network namespace has to be destroyed and recreated for the new CNI to take ownership of it, whether that recreation is triggered by a drain-eviction or a direct delete.
+
+**Fix:** Make the post-cutover recycle sweep mechanical, not memory-based. Immediately after the new CNI reports ready, recycle every Deployment/DaemonSet/StatefulSet in every namespace in one deliberate pass (`kubectl delete pods --all -A`, or `kubectl rollout restart` per controller) instead of only recycling the pods that are visibly broken. A pod can be quietly wired to the old CNI for weeks without crash-looping — it just fails any traffic that depends on the new CNI's service routing.
+
 ### kube-prometheus-stack OOM'd the node
 
 Installing `kube-prometheus-stack` (Prometheus + Grafana + Alertmanager + exporters) on a Hetzner CPX21 (3 vCPU, 4 GB RAM) killed the node. k3s itself was already consuming ~1.8 GB, leaving barely 2 GB for everything else. On startup, Prometheus alone spiked past what was available, the node hit 52 MB free, the embedded SQLite database started timing out on every query, and the API server became unreachable.
