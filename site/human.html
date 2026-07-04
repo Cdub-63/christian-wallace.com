@@ -116,6 +116,24 @@
       font-size: 0.8rem;
       color: #64748b;
     }
+
+    .comp-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .comp-card-grid img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      display: block;
+    }
+
+    @media (max-width: 480px) {
+      .comp-card-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -127,7 +145,7 @@
   <div class="hero">
     <h1>The Human</h1>
     <p class="subtitle">Beyond the terminal</p>
-    <p>Outside of work, I'm into fitness, lifestyle, and connecting with people. Find me here.</p>
+    <p>Outside of work, I'm into fitness, lifestyle, fashion, modeling and connecting with people. Find me here.</p>
   </div>
 
   <div class="divider"></div>
@@ -149,6 +167,14 @@
           <span class="link-handle">(312) 857-4838</span>
         </span>
       </a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Modeling</h2>
+    <div class="comp-card-grid">
+      <img src="/images/model-compcard-1.jpg" alt="Comp card photo 1">
+      <img src="/images/model-compcard-2.jpg" alt="Comp card photo 2">
     </div>
   </section>
 
