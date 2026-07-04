@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model — Christian D Wallace</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      line-height: 1.6;
+    }
+
+    a { color: #1d4ed8; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    nav {
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid #e2e8f0;
+      background: #ffffff;
+    }
+
+    nav a {
+      font-size: 0.875rem;
+      color: #475569;
+    }
+
+    nav a:hover { color: #0f172a; text-decoration: none; }
+
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    .hero h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.4rem;
+    }
+
+    .hero .subtitle {
+      font-size: 1rem;
+      color: #475569;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero p {
+      font-size: 0.975rem;
+      color: #334155;
+    }
+
+    .divider {
+      width: 36px;
+      height: 2px;
+      background: #1d4ed8;
+      margin: 2.5rem 0;
+    }
+
+    section { margin-bottom: 3rem; }
+
+    h2 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-bottom: 1.25rem;
+    }
+
+    .comp-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .comp-card-grid img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      display: block;
+    }
+
+    @media (max-width: 560px) {
+      .comp-card-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav><a href="/">← Home</a></nav>
+
+<div class="page">
+
+  <div class="hero">
+    <h1>The Model</h1>
+    <p class="subtitle">Comp card</p>
+    <p>A few shots from recent shoots.</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <section>
+    <h2>Comp Card</h2>
+    <div class="comp-card-grid">
+      <img src="/images/model-compcard-1.jpg" alt="Comp card photo 1">
+      <img src="/images/model-compcard-2.jpg" alt="Comp card photo 2">
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
