@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: site-traffic-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  site-traffic.json: |
+    {
+      "title": "Site Traffic",
+      "uid": "site-traffic",
+      "tags": ["site", "traefik"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "time": { "from": "now-24h", "to": "now" },
+      "refresh": "1m",
+      "panels": [
+        {
+          "id": 1,
+          "title": "Requests (24h)",
+          "type": "stat",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "sum(increase(traefik_service_requests_total{service=\"default-site-80@kubernetes\"}[24h]))",
+              "legendFormat": "requests"
+            }
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Error Rate (24h)",
+          "type": "stat",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+          "fieldConfig": { "defaults": { "unit": "percentunit" } },
+          "targets": [
+            {
+              "expr": "sum(increase(traefik_service_requests_total{service=\"default-site-80@kubernetes\",code=~\"4..|5..\"}[24h])) / sum(increase(traefik_service_requests_total{service=\"default-site-80@kubernetes\"}[24h]))",
+              "legendFormat": "errors"
+            }
+          ]
+        },
+        {
+          "id": 3,
+          "title": "Request Rate by Status Code",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+          "targets": [
+            {
+              "expr": "sum by (code) (rate(traefik_service_requests_total{service=\"default-site-80@kubernetes\"}[5m]))",
+              "legendFormat": "{{code}}"
+            }
+          ]
+        },
+        {
+          "id": 4,
+          "title": "Requests per Day",
+          "type": "timeseries",
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+          "targets": [
+            {
+              "expr": "sum(increase(traefik_service_requests_total{service=\"default-site-80@kubernetes\"}[1d]))",
+              "legendFormat": "requests/day"
+            }
+          ]
+        }
+      ]
+    }
