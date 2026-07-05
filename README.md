@@ -184,3 +184,9 @@ Installing `kube-prometheus-stack` (Prometheus + Grafana + Alertmanager + export
 
 **Fix:** Upgraded the node to CPX31 (4 vCPU, 8 GB RAM) via a one-line change to `server_type` in Terraform. Hetzner resizes in-place — same IP, data preserved, ~90 seconds of downtime.
 
+### Traefik metrics were generated but never scraped
+
+Wanted to see site visitor/request counts in Grafana. Traefik (the k3s built-in ingress) already had Prometheus metrics enabled internally (`--metrics.prometheus=true` on entrypoint `:9100`, and the pod spec even exposed a `metrics` containerPort) — but nothing was collecting it. No ServiceMonitor or PodMonitor existed for Traefik, so Prometheus had zero targets for it despite the data being available the whole time.
+
+**Fix:** Added a `PodMonitor` (`manifests/observability/traefik-podmonitor.yaml`) selecting the Traefik pod's existing `metrics` port, labeled `release: kube-prometheus-stack` so it matches the chart's `podMonitorSelector`. Synced via a new ArgoCD Application (`manifests/argocd/app-observability.yaml`) following the existing app-of-apps pattern — no changes to the k3s-managed Traefik resources themselves, so it can't be clobbered by k3s's own HelmChart reconciliation. Note this only gives request counts (`traefik_router_requests_total`), not unique visitors — Traefik has no concept of a visitor/session.
+
