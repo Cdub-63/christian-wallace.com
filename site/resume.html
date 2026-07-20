@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Christian D Wallace — Resume</title>
 <style>
-  @page { size: Letter; margin: 0.4in; }
+  @page { size: Letter; margin: 0.28in; }
   * { box-sizing: border-box; }
   html, body {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 9.5pt;
-    line-height: 1.2;
+    font-size: 9pt;
+    line-height: 1.12;
     color: #111;
     margin: 0;
     padding: 0;
   }
-  body { max-width: 7.5in; margin: 0 auto; padding: 0.35in 0.4in 0.25in 0.4in; }
+  body { max-width: 7.5in; margin: 0 auto; padding: 0.24in 0.4in 0.16in 0.4in; }
 
   .screen-nav {
     display: flex;
@@ -59,7 +59,7 @@
     text-transform: uppercase;
     letter-spacing: 0.6pt;
     border-bottom: 1px solid #222;
-    margin: 6pt 0 2pt 0;
+    margin: 4pt 0 1pt 0;
     padding-bottom: 1pt;
     font-weight: 700;
   }
@@ -67,25 +67,25 @@
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-top: 3pt;
+    margin-top: 1pt;
   }
   .job-header .left { font-weight: 700; font-size: 9.75pt; }
   .job-header .right { font-size: 9pt; color: #444; font-style: italic; }
   .role { font-size: 9pt; font-style: italic; color: #333; margin-bottom: 1pt; }
   ul {
-    margin: 0 0 2pt 0;
-    padding-left: 14pt;
+    margin: 0 0 0.5pt 0;
+    padding-left: 13pt;
     page-break-inside: avoid;
   }
   li {
-    margin: 1pt 0;
-    line-height: 1.22;
+    margin: 0.25pt 0;
+    line-height: 1.12;
   }
-  .footer-block { font-size: 9pt; margin-top: 1pt; }
-  .footer-block p { margin: 1.5pt 0; }
+  .footer-block { font-size: 8.6pt; margin-top: 0.5pt; }
+  .footer-block p { margin: 0.75pt 0; }
   strong { font-weight: 600; }
   .job-block { page-break-inside: avoid; }
-  .profile { font-size: 9.5pt; line-height: 1.3; margin-top: 2pt; text-align: justify; }
+  .profile { font-size: 9pt; line-height: 1.18; margin-top: 0.5pt; text-align: justify; }
   .profile strong { font-weight: 700; }
 </style>
 </head>
@@ -105,7 +105,7 @@
 </div>
 
 <h2>Profile</h2>
-<p class="profile"><strong>Senior Platform &amp; Site Reliability Engineer</strong> with 10 years bridging production networking and cloud infrastructure at scale. Currently architecting Instructure's multi-region EKS platform that powers <strong>Canvas LMS for tens of millions of learners worldwide</strong>. Combine deep networking foundations (BGP, IPsec, Cisco ACI, SD-WAN, AWS Transit Gateway mesh design) with modern platform engineering (Kubernetes, GitOps, FinOps, Zero-Trust ZTNA, policy-as-code). Known for owning multi-region migrations end-to-end and building the reusable IaC modules other teams ship on top of.</p>
+<p class="profile">I'm a <strong>Senior Site Reliability Engineer</strong> with 10 years of experience combining deep networking with modern cloud platform engineering. I operate Instructure's multi-region Kubernetes platform, powering <strong>Canvas LMS for tens of millions of learners worldwide</strong>, and I'm known for owning multi-region migrations end-to-end and building the reusable infrastructure application teams build on.</p>
 
 <h2>Work Experience</h2>
 
@@ -113,27 +113,15 @@
   <div class="left">Instructure, Salt Lake City</div>
   <div class="right">Apr 2021 – Present</div>
 </div>
-<div class="role">Senior Site Reliability Engineer / Platform Engineer</div>
+<div class="role">Senior Site Reliability Engineer</div>
 <ul>
-  <li>Build and scale Instructure's internal developer platform ("Trigger") that powers Canvas LMS — <strong>40 EKS clusters across 8 production AWS regions, 42 deployment groups, and 433 active service deployments</strong> on Akuity-managed ArgoCD GitOps, with Helm/Kustomize manifests and Kyverno policy-as-code; shipped new regional clusters and led migration of production workloads off the legacy Cloudgate/Condor PaaS onto a Node.js/Express + MongoDB deployment API</li>
-  <li>Architected and delivered the migration of two parallel <strong>AWS Transit Gateway meshes off VyOS-on-EC2</strong>, then led a <strong>fleet-wide TGW security-group referencing rollout across 34 TGWs in 9 regions with zero customer impact</strong>, eliminating thousands of CIDR-based rules; authored reusable TGW Terraform modules and orchestrated CLI-driven workspace applies across Terraform Cloud</li>
-  <li>Led <strong>company-wide Zero-Trust access modernization</strong>: phased AppGate ZTNA rollout replacing Teleport + standalone SSH keys for the entire engineering org, ArgoCD prod Okta SSO via SCIM, and IAM Identity Center SCIM token rotation across multi-account AWS Organizations</li>
-  <li>Designed and deployed <strong>org-wide cloud security and FinOps tooling</strong>: CrowdStrike CSPM across 9 AWS accounts, AWS Config continuous-mode StackSets recording WAFv2/CloudFront/ELBv2 org-wide, CloudZero cost-attribution labels across the EKS fleet, and incident-response AWS WAF tuning during an active post-compromise investigation</li>
-  <li>Led the <strong>observability migration from Datadog to Observe</strong> (OPAL queries, dashboards, alerting) and modernized the Gerrit source-control fleet (NoteDb schema upgrade 3.6.8 → 3.7.8, Classic ELB → NLB+ALB+WAF cutover); shipped Go/Ruby/Python tooling that measurably cut developer deployment toil and cycle time</li>
-  <li>Architected network and IAM for new AWS LZA accounts and regions end-to-end (planning → IPAM → routing → production); built the group-based AD/Okta access model used by every engineering team across AWS, ArgoCD, Datadog, Vault, and 1Password</li>
+  <li>Built Instructure's internal developer platform ("Trigger") powering Canvas LMS across <strong>40 EKS clusters in 8 AWS regions with 433 active service deployments</strong> on Akuity-managed ArgoCD GitOps with Helm/Kustomize and Kyverno policy-as-code, giving every team a self-service path to ship and scale services. Now building Trigger's next-generation deployment API on Node.js/Express and MongoDB with Go and Python tooling, replacing the legacy internal PaaS it runs on</li>
+  <li>Architected and built Instructure's <strong>AWS Transit Gateway mesh</strong> with Terraform and Ruby, migrating off a self-hosted VyOS mesh running iBGP and OSPF with zero customer downtime. The new mesh has held <strong>five-nines uptime</strong> since cutover and cut the administrative overhead of running our own routing infrastructure. Also led a fleet-wide TGW security-group referencing rollout across 34 TGWs in 9 regions, trimming thousands of CIDR-based rules</li>
+  <li>Led <strong>company-wide Zero-Trust modernization</strong>, migrating to AppGate ZTNA to replace scattered SSH keys, a legacy Teleport VPN, and the GlobalProtect client VPN, eliminating the bottleneck of routing all traffic through HQ. Also rolled out ArgoCD Okta SSO via SCIM and HashiCorp Vault, giving every engineer centrally managed, auditable access</li>
+  <li>Designed <strong>org-wide security tooling</strong>, including CrowdStrike CSPM, Wiz, and AWS Config StackSets. When that tooling caught an active post-compromise incident, used it to trace what changed and tuned AWS WAF rules in real time to contain the attack, then led the migration to Signal Sciences for longer-term WAF coverage</li>
+  <li>Owned <strong>observability and CI/CD strategy</strong>, spanning Datadog/Observe dashboards, GitHub/Gerrit for version control, and Jenkins/GitHub Actions pipelines that gave every team a paved-road way to ship and debug safely</li>
+  <li>Architected <strong>network/IAM for new AWS LZA accounts</strong> end-to-end, replacing one-off account requests with a group-based access model every team now onboards through</li>
 </ul>
-
-<div class="job-block">
-  <div class="job-header">
-    <div class="left">Chicago Elite Fitness, Chicago</div>
-    <div class="right">Nov 2025 – Present</div>
-  </div>
-  <div class="role">Coach</div>
-  <ul>
-    <li>Coach and mentor groups of 15–20 athletes in a live performance setting — building communication, adaptive teaching, and on-the-fly decision-making skills that translate directly to leading engineering teams and stakeholder meetings</li>
-    <li>Provide individualized coaching and form correction, building strong client relationships and fostering a community that drives retention and referrals</li>
-  </ul>
-</div>
 
 <div class="job-block">
   <div class="job-header">
@@ -142,8 +130,8 @@
   </div>
   <div class="role">Network Engineer</div>
   <ul>
-    <li>Engineered Cisco ASA 5508 AnyConnect VPN split-tunneling during the COVID-19 remote-work transition, <strong>cutting corporate bandwidth utilization by 60%</strong> overnight and keeping a fully remote financial-services workforce productive from day one of lockdown</li>
-    <li>Built centralized network configuration and change-management automation — NetBrain for design and drift detection, RANCID for nightly config tracking, NetBox for IPAM, and Cisco ACI for data-center fabric policy — an early forcing function for treating network state as declarative, version-controlled config</li>
+    <li>Engineered Cisco ASA 5508 AnyConnect VPN split-tunneling during the COVID-19 remote-work transition, <strong>cutting corporate bandwidth utilization by 60%</strong> overnight for a fully remote financial-services workforce</li>
+    <li>Built <strong>centralized network configuration and change-management automation</strong> using NetBrain, RANCID, NetBox, and Cisco ACI, giving engineering teams automated drift detection, nightly config history for faster troubleshooting, a single source of truth for IP allocation, and declarative fabric policy instead of manual CLI changes</li>
   </ul>
 </div>
 
@@ -154,8 +142,8 @@
   </div>
   <div class="role">Network Engineer I</div>
   <ul>
-    <li>Led migration of <strong>30+ customer Site-to-Site IPsec VPN tunnels</strong> from Dell SonicWall to Cisco ASA 5525 for a behavioral-health managed-care client base, coordinating cutover windows, routing changes, and policy translation with external engineering teams across multiple customer environments — direct precursor to the AWS Transit Gateway mesh-migration work I lead today</li>
-    <li>Delivered full headquarters network build-out — physical-layer upgrades, licensing, structured cabling, out-of-band management — supporting Cisco SD-WAN and Meraki deployments</li>
+    <li>Led migration of <strong>30+ customer Site-to-Site IPsec VPN tunnels</strong> from Dell SonicWall to Cisco ASA 5525, coordinating cutover windows and policy translation directly with each B2B partner's network team</li>
+    <li>Designed and built <strong>the entire network for a new company headquarters</strong>, including switches, Meraki access points, and Cisco SD-WAN, enabling branch sites to route directly instead of backhauling through a hub-and-spoke WAN, cutting latency and adding resilient failover</li>
   </ul>
 </div>
 
@@ -166,28 +154,28 @@
   </div>
   <div class="role">Technical Solutions Analyst</div>
   <ul>
-    <li>Owned <strong>tier-3 production incident response</strong> for a 24/7 mission-critical EHR platform serving healthcare providers nationwide, root-causing outages affecting clinician access to patient records and translating complex failure modes into clear remediation steps for non-technical clinical staff</li>
-    <li>Hands-on Linux administration, SQL debugging, and production incident response on workloads where downtime had direct patient-care impact — built the operational instincts for treating infrastructure failures with the same urgency as a clinical emergency</li>
+    <li>Owned <strong>tier-3 production incident response</strong> for a 24/7 mission-critical EHR platform serving healthcare providers nationwide, troubleshooting complex outages where every second counted for clinicians making time-sensitive care decisions</li>
+    <li>Administered production <strong>Linux systems</strong> at the OS level and wrote <strong>SQL</strong> directly against application databases to correct corrupted data and resolve failures that restarts and scripted fixes couldn't touch</li>
   </ul>
 </div>
 
 <h2>Education</h2>
 <div class="job-header">
-  <div class="left">The University of Tulsa &mdash; B.S. Computer Science</div>
+  <div class="left">The University of Tulsa, B.S. Computer Science</div>
   <div class="right">June 2012 – May 2016</div>
 </div>
 
 <h2>Additional</h2>
 <div class="footer-block">
-  <p><strong>Technical Skills &mdash; Cloud / AWS:</strong> Multi-account AWS Organizations, Landing Zone Accelerator (LZA), IAM Identity Center, Transit Gateway, VPC/IPAM, Route53, EKS, ECR, KMS, CloudFront, WAFv2, Config, StackSets, Lambda, multi-region high-availability</p>
-  <p><strong>Platform &amp; Reliability Engineering:</strong> Internal Developer Platforms (IDP), Kubernetes at scale (40+ EKS clusters), Helm, Kustomize, ArgoCD/Akuity, Kyverno policy-as-code, deployment APIs, on-call &amp; production incident response</p>
-  <p><strong>IaC &amp; CI/CD:</strong> Terraform + Terraform Cloud, Ansible, Ruby (Cloudgate), ArgoCD GitOps, Jenkins, GitHub Actions, Gerrit, pre-commit, reusable module design</p>
-  <p><strong>Networking:</strong> AWS Transit Gateway (SG referencing, mesh design), BGP, IPsec, Site-to-Site VPN, SD-WAN, Cisco ACI, AppGate ZTNA, multi-region routing</p>
-  <p><strong>Security:</strong> Zero-Trust access, CrowdStrike CSPM, Wiz, HashiCorp Vault, Okta SSO/SCIM, AWS WAFv2, AWS Config (continuous recording, multi-region StackSets), incident response</p>
-  <p><strong>Observability &amp; FinOps:</strong> Observe (OPAL), Datadog, Splunk, Sentry, OpenTelemetry, CloudZero cost attribution</p>
-  <p><strong>Languages:</strong> Go, Python, Ruby, Bash, Node.js, SQL</p>
+  <p><strong>Cloud / AWS:</strong> AWS Organizations, Landing Zone Accelerator (LZA), IAM Identity Center, VPC/IPAM, EKS, CloudFront</p>
+  <p><strong>Platform &amp; Reliability Engineering:</strong> Internal Developer Platforms (IDP), Kubernetes, Helm, Kustomize, ArgoCD, Akuity, Kyverno, policy-as-code, on-call, incident response</p>
+  <p><strong>IaC &amp; CI/CD:</strong> Terraform, Terraform Cloud, Ansible, ArgoCD, GitOps, Jenkins, GitHub Actions</p>
+  <p><strong>Networking:</strong> AWS Transit Gateway, BGP, OSPF, IPsec, Site-to-Site VPN, SD-WAN, Cisco ACI, AppGate ZTNA</p>
+  <p><strong>Security:</strong> Zero-Trust, CrowdStrike CSPM, Wiz, HashiCorp Vault, Okta SSO/SCIM, AWS WAFv2, Signal Sciences, AWS Config, StackSets</p>
+  <p><strong>Observability &amp; FinOps:</strong> Observe (OPAL), Datadog, Prometheus, Grafana, OpenMetrics, Splunk, OpenTelemetry, CloudZero</p>
+  <p><strong>Languages:</strong> Go, Python, Ruby, HCL, Bash, Node.js, SQL</p>
   <p><strong>Certifications:</strong> AWS Certified Solutions Architect &ndash; Associate (SAA), Cisco Certified Network Professional (CCNP), Cisco Certified Network Associate (CCNA), ISSA Certified Personal Trainer (CPT), CrossFit Level 1 Trainer (CF-L1)</p>
-  <p><strong>Activities:</strong> D1 Collegiate Football Athlete &mdash; Offensive Guard, KC Pet Project &mdash; Volunteer</p>
+  <p><strong>Activities:</strong> D1 Collegiate Football Athlete (Offensive Guard), CrossFit Coach (Chicago Elite Fitness), KC Pet Project (Volunteer)</p>
 </div>
 
 </body>
