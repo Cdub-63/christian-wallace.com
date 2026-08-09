@@ -25,7 +25,7 @@ resource "cloudflare_record" "root" {
   type    = "A"
   content = hcloud_server.k3s.ipv4_address
   ttl     = 1
-  proxied = false
+  proxied = true
 }
 
 resource "cloudflare_record" "www" {
@@ -34,7 +34,7 @@ resource "cloudflare_record" "www" {
   type    = "A"
   content = hcloud_server.k3s.ipv4_address
   ttl     = 1
-  proxied = false
+  proxied = true
 }
 
 resource "cloudflare_record" "argocd" {
@@ -95,8 +95,8 @@ resource "hcloud_firewall" "k3s" {
 resource "hcloud_server" "k3s" {
   name        = "k3s-node-1"
   image       = "ubuntu-24.04"
-  server_type = "cpx31"
-  location    = "ash"
+  server_type = "cx33"
+  location    = "fsn1"
   ssh_keys    = [hcloud_ssh_key.default.id]
   firewall_ids = [hcloud_firewall.k3s.id]
 
