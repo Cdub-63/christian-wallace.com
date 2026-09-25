@@ -133,15 +133,15 @@ Real issues hit during the build, documented here because they're the kind of th
 
 ### Locking down the web server broke it
 
-**Problem:** Running the nginx web server as a non-root user is a standard security hardening step, but doing it broke the server outright. nginx's default setup needs root-level access for its network port and file access.
+**Problem:** Running the nginx web server as a non-root user is a standard security hardening step, but doing it broke the server outright. nginx's default config binds to port 80, which needs root, and also breaks its file access when the filesystem is made read-only.
 
-**Solution:** Reconfigured nginx to use an unprivileged port and writable temp storage, so it runs securely without needing elevated permissions.
+**Solution:** Reconfigured nginx to listen on port 8080 instead of 80, and added writable temp storage for its cache and PID files, so it runs securely without needing elevated permissions.
 
 ### The dashboard login password kept changing on its own
 
 **Problem:** Grafana's admin password silently reset itself after routine Helm chart updates, locking people out with no warning.
 
-**Solution:** Moved the password into a separate Kubernetes Secret that Helm updates don't touch, so login stays consistent going forward.
+**Solution:** Moved the password into a separate Kubernetes Secret that Helm updates don't touch, and added a 1GB persistent volume so Grafana's database survives pod restarts instead of resetting, so login stays consistent going forward.
 
 ### Network security rules were being silently ignored
 
