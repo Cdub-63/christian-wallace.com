@@ -1,6 +1,6 @@
 # christian-wallace.com
 
-Personal portfolio and Kubernetes homelab. Resume, blog, and more — deployed via GitOps on a self-managed k3s cluster.
+Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via GitOps on a self-managed k3s cluster.
 
 ## Tech Stack
 
@@ -32,7 +32,7 @@ graph TB
     Actions[GitHub Actions<br/>Build + Push]
     GHCR[GHCR<br/>ghcr.io/cdub-63/christian-wallace-site]
 
-    subgraph Hetzner ["Hetzner CX33 — Falkenstein, DE (178.105.67.27)"]
+    subgraph Hetzner ["Hetzner CX33, Falkenstein, DE (178.105.67.27)"]
         subgraph k3s ["k3s Cluster"]
             Traefik[Traefik Ingress<br/>:80 / :443]
 
@@ -68,7 +68,7 @@ graph TB
 
 Every tool here replaces something painful. This is what the stack looks like without it:
 
-**Without Terraform:** Hetzner server, firewall, and SSH key would be manual console clicks with no record of what was done — `terraform apply` rebuilds all of it from scratch in 30 seconds.
+**Without Terraform:** Hetzner server, firewall, and SSH key would be manual console clicks with no record of what was done. `terraform apply` rebuilds all of it from scratch in 30 seconds.
 
 **Without Cloudflare DNS-as-code:** Reprovisioning the server would mean remembering to manually update the A record with the new IP. Terraform updates it automatically on every apply.
 
@@ -96,7 +96,7 @@ christian-wallace.com/
 │   ├── cert-manager/
 │   └── site/
 ├── site/               # HTML/CSS source for the website
-└── .github/workflows/  # GitHub Actions — build + push to GHCR
+└── .github/workflows/  # GitHub Actions: build + push to GHCR
 ```
 
 ## Local Setup
@@ -127,13 +127,13 @@ Real issues hit during the build, documented here because they're the kind of th
 
 ### New code didn't reach the site automatically
 
-**Problem:** GitHub Actions built and pushed a new site image on every commit, but the live site kept showing the old version — ArgoCD, the GitOps tool managing deployments, only checks Git for what to run, not the container registry, so it never noticed a new image existed.
+**Problem:** GitHub Actions built and pushed a new site image on every commit, but the live site kept showing the old version. ArgoCD, the GitOps tool managing deployments, only checks Git for what to run, not the container registry, so it never noticed a new image existed.
 
 **Solution:** Added a step to the GitHub Actions pipeline that updates the image version in Git right after each build, so ArgoCD always sees the change and rolls it out on its own.
 
 ### Locking down the web server broke it
 
-**Problem:** Running the nginx web server as a non-root user is a standard security hardening step, but doing it broke the server outright — nginx's default setup needs root-level access for its network port and file access.
+**Problem:** Running the nginx web server as a non-root user is a standard security hardening step, but doing it broke the server outright. nginx's default setup needs root-level access for its network port and file access.
 
 **Solution:** Reconfigured nginx to use an unprivileged port and writable temp storage, so it runs securely without needing elevated permissions.
 
@@ -145,25 +145,25 @@ Real issues hit during the build, documented here because they're the kind of th
 
 ### Network security rules were being silently ignored
 
-**Problem:** Kubernetes NetworkPolicy rules meant to restrict which services could talk to each other appeared to apply but did nothing — Flannel, the default networking layer in k3s, accepted them without error, then simply didn't enforce them.
+**Problem:** Kubernetes NetworkPolicy rules meant to restrict which services could talk to each other appeared to apply but did nothing. Flannel, the default networking layer in k3s, accepted them without error, then simply didn't enforce them.
 
 **Solution:** Replaced Flannel with Cilium, a networking layer that actually enforces the rules, closing the gap.
 
 ### Config changes in Git weren't taking effect
 
-**Problem:** Settings changes were committed to Git as usual, but the live system kept running the old configuration — causing three days of Grafana login failures before the mismatch was found.
+**Problem:** Settings changes were committed to Git as usual, but the live system kept running the old configuration, causing three days of Grafana login failures before the mismatch was found.
 
 **Solution:** Set ArgoCD to manage its own configuration the same way it manages everything else ("app of apps"), so any change committed to Git now applies automatically.
 
 ### Switching the network layer broke already-running services
 
-**Problem:** After migrating from Flannel to Cilium, services that were already running kept using stale, broken network connections and started crashing — including Prometheus, the monitoring tool, which couldn't reach the Kubernetes API.
+**Problem:** After migrating from Flannel to Cilium, services that were already running kept using stale, broken network connections and started crashing, including Prometheus, the monitoring tool, which couldn't reach the Kubernetes API.
 
 **Solution:** Restarted every running service right after the switch so each one picked up a fresh, working connection.
 
 ### A few services were missed in that restart
 
-**Problem:** Ten days after the Cilium migration, a handful of services — including part of ArgoCD itself — were quietly still broken; they'd been running fine outwardly, so they were skipped during the initial restart.
+**Problem:** Ten days after the Cilium migration, a handful of services, including part of ArgoCD itself, were quietly still broken. They'd been running fine outwardly, so they were skipped during the initial restart.
 
 **Solution:** Turned "restart everything" into a standard, no-exceptions step after any future networking change, rather than relying on spotting which services look broken.
 
@@ -171,13 +171,13 @@ Real issues hit during the build, documented here because they're the kind of th
 
 **Problem:** Installing Prometheus and Grafana (via the kube-prometheus-stack Helm chart) used more memory than the Hetzner server had available, causing the whole server to become unresponsive.
 
-**Solution:** Upgraded to a Hetzner server with more RAM — a one-line Terraform change with about 90 seconds of downtime.
+**Solution:** Upgraded to a Hetzner server with more RAM, a one-line Terraform change with about 90 seconds of downtime.
 
 ### Hosting costs doubled overnight for no clear reason
 
-**Problem:** The monthly Hetzner bill jumped from ~$37 to $73 with no change in server size — caused by a pricing gap where Hetzner kept older, more expensive server plans on sale only in its US locations after rolling out cheaper ones in Europe.
+**Problem:** The monthly Hetzner bill jumped from ~$37 to $73 with no change in server size, caused by a pricing gap where Hetzner kept older, more expensive server plans on sale only in its US locations after rolling out cheaper ones in Europe.
 
-**Solution:** Migrated the server to Hetzner's Falkenstein, Germany data center, cutting the bill to $8.99/month — an 88% reduction — with no drop in performance, plus a Cloudflare proxy tweak to offset the added distance for US visitors.
+**Solution:** Migrated the server to Hetzner's Falkenstein, Germany data center, cutting the bill to $8.99/month (an 88% reduction) with no drop in performance, plus a Cloudflare proxy tweak to offset the added distance for US visitors.
 
 ### Useful metrics were being generated but never collected
 
