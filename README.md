@@ -169,9 +169,9 @@ Real issues hit during the build, documented here because they're the kind of th
 
 ### A monitoring install crashed the server
 
-**Problem:** Installing Prometheus and Grafana (via the kube-prometheus-stack Helm chart) used more memory than the Hetzner server had available, causing the whole server to become unresponsive.
+**Problem:** Installing Prometheus and Grafana (via the kube-prometheus-stack Helm chart) used more memory than the Hetzner server had available. The 4GB server was already down to 52MB free once k3s and the new pods started up, making it unresponsive.
 
-**Solution:** Upgraded to a Hetzner server with more RAM, a one-line Terraform change with about 90 seconds of downtime.
+**Solution:** Upgraded from a 4GB to an 8GB Hetzner server, a one-line Terraform change with about 90 seconds of downtime.
 
 ### Hosting costs doubled overnight for no clear reason
 
