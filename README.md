@@ -125,67 +125,63 @@ k9s
 
 Real issues hit during the build, documented here because they're the kind of thing tutorials skip.
 
-### ArgoCD autosync doesn't redeploy on new images
+### New code didn't reach the site automatically
 
-ArgoCD syncs what's in Git, not what's in the registry — after wiring up CI to push a new image on every commit, pods stopped updating because the deployment manifest still had the old tag, and ArgoCD reported "Synced" anyway.
+**Problem:** GitHub Actions built and pushed a new site image on every commit, but the live site kept showing the old version — the deployment tool only checks Git for what to run, not the container registry, so it never noticed a new image existed.
 
-**Fix:** A `sed` step at the end of the GitHub Actions workflow rewrites the image tag in `manifests/site/deployment.yaml` and commits it back. The CI commit drives the deploy, not the image push.
+**Solution:** Added a step to the build pipeline that updates the version number in Git right after each build, so the deployment tool always sees the change and rolls it out on its own.
 
-### Running nginx as non-root requires more than just a securityContext
+### Locking down the web server broke it
 
-Setting `runAsNonRoot: true` is only the start. nginx:alpine's default config binds to port 80, which needs root, and `readOnlyRootFilesystem: true` breaks its PID file and temp paths on the root filesystem.
+**Problem:** Running the web server as a non-root user is a standard security hardening step, but doing it broke the server outright — its default setup needs root-level access for its network port and file access.
 
-**Fix:** A custom `nginx.conf` moves the PID file and all five temp-path directives to `/tmp`; a custom `default.conf` listens on `8080` instead of `80`; and two `emptyDir` volumes make `/var/cache/nginx` and `/tmp` writable. The Service `targetPort` and NetworkPolicy port must move to `8080` too — missing either leaves traffic silently dead.
+**Solution:** Reconfigured the server to use an unprivileged port and writable temp storage, so it runs securely without needing elevated permissions.
 
-### Grafana password silently rotated on every ArgoCD sync
+### The dashboard login password kept changing on its own
 
-The chart generates a random admin password on install and reuses it on upgrade via Helm's `lookup` function — but ArgoCD renders charts offline (`helm template`), so `lookup` always returns nothing and a new random password lands in the Secret on every sync while Grafana's SQLite DB keeps the old one. Login broke silently.
+**Problem:** The monitoring dashboard's admin password silently reset itself after routine updates, locking people out with no warning.
 
-**Fix:** Create the secret *outside* Helm (`kubectl create secret generic grafana-admin-creds -n monitoring --from-literal=admin-user=admin --from-literal=admin-password=<pw>`) and point `grafana.admin.existingSecret` at it — the chart's own auto-created secret (`kube-prometheus-stack-grafana`) still gets re-rendered every sync, so it has to be a secret ArgoCD doesn't own. Also enable `grafana.persistence` (PVC) so the SQLite DB survives restarts instead of re-initializing from a stale secret. To recover after drift: `grafana cli admin reset-admin-password <pw>` inside the pod.
+**Solution:** Moved the password into a separate, stable location that updates don't touch, so login stays consistent going forward.
 
-### Flannel silently ignores NetworkPolicy
+### Network security rules were being silently ignored
 
-Applying a NetworkPolicy with Flannel (k3s's default CNI) does nothing — Flannel routes pods but never enforces policy, and the API server accepts the manifest with no error or warning. Traffic just flows as if it doesn't exist.
+**Problem:** Rules meant to restrict which services could talk to each other appeared to apply but did nothing — the underlying networking layer accepted them without error, then simply didn't enforce them.
 
-**Fix:** Replace Flannel with Cilium (eBPF-based, O(1) kernel hash maps instead of iptables chains, plus Hubble for flow observability). On a live cluster: set `flannel-backend: none` and `disable-network-policy: true` in `/etc/rancher/k3s/config.yaml`, restart k3s, delete the stale `flannel.1` interface, `helm install` Cilium (`operator.replicas=1`), then cycle every pod to pick up new network interfaces. Cilium is a bootstrap dependency — it needs one manual `helm install` before ArgoCD exists; after that, `manifests/argocd/app-cilium.yaml` manages upgrades.
+**Solution:** Replaced that networking layer with one (Cilium) that actually enforces the rules, closing the gap.
 
-### ArgoCD doesn't manage its own Application manifests
+### Config changes in Git weren't taking effect
 
-ArgoCD manages whatever its Application resources *point at*, but the Application resources themselves are just regular Kubernetes objects — editing `app-monitoring.yaml` in Git does nothing until something applies it to the cluster. This caused three days of Grafana login failures: the password-rotation and PVC fixes were committed, but the live Application resource still had the old values, so ArgoCD kept syncing the chart correctly with the wrong config.
+**Problem:** Settings changes were committed to Git as usual, but the live system kept running the old configuration — causing three days of dashboard login failures before the mismatch was found.
 
-**Fix:** App-of-apps. A root Application (`manifests/argocd/root-app.yaml`) watches `manifests/argocd/` and applies everything in it, so changes to Application manifests go live on push too. Bootstrapped once via `kubectl apply -f manifests/argocd/root-app.yaml`; after that, git is the only control plane.
+**Solution:** Set the deployment tool to manage its own configuration the same way it manages everything else, so any change committed to Git now applies automatically.
 
-### Replacing the CNI leaves surviving pods with broken networking
+### Switching the network layer broke already-running services
 
-When Cilium replaced Flannel, already-running pods kept their old network namespace and eBPF state, so they crash-looped instead of recovering — Prometheus couldn't reach the API ClusterIP and kept failing its startup probe. A fresh debug pod in the same namespace worked fine, confirming the problem was stale state on the long-lived pods, not the network itself.
+**Problem:** After upgrading the underlying networking system, services that were already running kept using stale, broken connections and started crashing.
 
-**Fix:** Delete all running pods after any CNI swap so they restart with a fresh namespace and clean Cilium endpoint entries — crash-loop restarts alone don't trigger namespace recreation, only a full delete does.
+**Solution:** Restarted every running service right after the switch so each one picked up a fresh, working connection.
 
-### The pod recycle sweep after that fix was still incomplete
+### A few services were missed in that restart
 
-Ten days after the Cilium cutover, ArgoCD's sync status was stuck on `Unknown`. Cause: `argocd-application-controller-0`, a StatefulSet pod never recycled during the cutover, still held a stale Flannel IP and couldn't resolve `argocd-repo-server` via CoreDNS. A sweep for pods still on the old `10.42.0.0/16` CIDR turned up three more stragglers that never crash-looped loudly enough to notice: `metrics-server` (silently `0/1`), `local-path-provisioner`, and the `svclb-traefik` DaemonSet pod.
+**Problem:** Ten days after the networking upgrade, a handful of services were quietly still broken — they'd been running fine outwardly, so they were skipped during the initial restart.
 
-The lesson isn't "avoid CNI-swap downtime" — on a single-node cluster there's no second node to shift load to, so some downtime during cutover is unavoidable. Multi-node clusters just stagger the same requirement via cordon-and-drain instead of eating it all at once; every pod's namespace still has to be destroyed and recreated either way.
+**Solution:** Turned "restart everything" into a standard, no-exceptions step after any future networking change, rather than relying on spotting which services look broken.
 
-**Fix:** Make the recycle sweep mechanical, not memory-based. Immediately after the new CNI is ready, recycle every Deployment/DaemonSet/StatefulSet in every namespace in one pass (`kubectl delete pods --all -A`) instead of only the pods that are visibly broken — a pod can sit quietly wired to the old CNI for weeks without crash-looping.
+### A monitoring install crashed the server
 
-### kube-prometheus-stack OOM'd the node
+**Problem:** Installing the monitoring stack used more memory than the server had available, causing the whole server to become unresponsive.
 
-Installing `kube-prometheus-stack` on a Hetzner CPX21 (4GB RAM) killed the node — k3s alone already used ~1.8GB, and Prometheus's startup spike pushed free memory to 52MB, timing out its own SQLite database and making the API server unreachable.
+**Solution:** Upgraded to a server with more RAM — a one-line config change with about 90 seconds of downtime.
 
-**Fix:** Upgraded to CPX31 (8GB) via a one-line `server_type` change in Terraform — Hetzner resizes in-place, same IP, data preserved, ~90 seconds of downtime.
+### Hosting costs doubled overnight for no clear reason
 
-### Hetzner's June 2026 price hike only hit the US region, and only the old server line
+**Problem:** The monthly bill jumped from ~$37 to $73 with no change in server size — caused by a pricing gap where the hosting provider kept older, more expensive server plans on sale only in its US locations after rolling out cheaper ones elsewhere.
 
-The bill jumped from ~$37 to $73.49 with no size change. Cause: Hetzner rolled out a cheaper server generation (CX23–CX53, CAX ARM) in June 2026, but only in its European datacenters — Ashburn and Hillsboro never got it, and the old CPX line was deprecated everywhere *except* those two US locations, where it stayed on sale at sharply inflated pricing instead. `hcloud server-type describe cpx31` shows the identical 4-core/8GB spec at $20.49/mo in Falkenstein vs. $73.49/mo in Ashburn — a 3.6x markup just for hosting in the US.
+**Solution:** Migrated the server to a European data center, cutting the bill to $8.99/month — an 88% reduction — with no drop in performance, plus a minor DNS tweak to offset the added distance for US visitors.
 
-**Fix:** Migrated to a `cx33` in Falkenstein — $8.99/mo, an 88% cut. `hcloud server-type list` confirmed CX/CAX don't exist as options in `ash`/`hil`, and downsizing within CPX/CCX there had no path below ~$51/mo. This crossed regions, so unlike the earlier CPX21→CPX31 resize, no in-place upgrade was possible — it meant a full rebuild: new server, k3s with Cilium as the CNI from first boot (no Flannel-migration dance this time), cert-manager + ArgoCD reinstalled via Helm, `grafana-admin-creds` recreated, then `root-app.yaml` applied to let ArgoCD pull everything back in from Git. Cut over by repointing the four Cloudflare A records; certs re-issued automatically once DNS propagated. The old server stayed up until the new one was verified healthy end-to-end.
+### Useful metrics were being generated but never collected
 
-Also flipped root and `www` to Cloudflare-proxied (`proxied = true`) — the origin moved from Virginia to Germany, so routing US visitors through Cloudflare's edge offsets the added latency. `argocd`/`grafana` stayed DNS-only since proxying admin tools adds no benefit.
+**Problem:** The site's traffic router was already producing detailed metrics internally, but nothing was set up to collect them, so that data was effectively invisible.
 
-### Traefik metrics were generated but never scraped
-
-Traefik already had Prometheus metrics enabled internally (`--metrics.prometheus=true`, a `metrics` containerPort exposed) — but nothing was collecting it. No ServiceMonitor or PodMonitor existed, so Prometheus had zero targets despite the data being available the whole time.
-
-**Fix:** Added a `PodMonitor` selecting Traefik's `metrics` port, labeled `release: kube-prometheus-stack` to match the chart's selector, synced via a new `app-observability.yaml` Application — no changes to the k3s-managed Traefik resources, so it can't be clobbered by k3s's own reconciliation. Gives request counts (`traefik_router_requests_total`) only, not unique visitors — Traefik has no concept of a session.
+**Solution:** Added a small monitoring config to start pulling those metrics into the dashboard.
 
