@@ -163,7 +163,7 @@ Real issues hit during the build, documented here because they're the kind of th
 
 ### A few services were missed in that restart
 
-**Problem:** Ten days after the Cilium migration, a handful of services, including part of ArgoCD itself, were quietly still broken. They'd been running fine outwardly, so they were skipped during the initial restart.
+**Problem:** Ten days after the Cilium migration, 4 services were quietly still broken: the ArgoCD application controller, the metrics server, the storage provisioner, and the Traefik load balancer. They'd been running fine outwardly, so they were skipped during the initial restart.
 
 **Solution:** Turned "restart everything" into a standard, no-exceptions step after any future networking change, rather than relying on spotting which services look broken.
 
