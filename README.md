@@ -127,61 +127,61 @@ Real issues hit during the build, documented here because they're the kind of th
 
 ### New code didn't reach the site automatically
 
-**Problem:** GitHub Actions built and pushed a new site image on every commit, but the live site kept showing the old version — the deployment tool only checks Git for what to run, not the container registry, so it never noticed a new image existed.
+**Problem:** GitHub Actions built and pushed a new site image on every commit, but the live site kept showing the old version — ArgoCD, the GitOps tool managing deployments, only checks Git for what to run, not the container registry, so it never noticed a new image existed.
 
-**Solution:** Added a step to the build pipeline that updates the version number in Git right after each build, so the deployment tool always sees the change and rolls it out on its own.
+**Solution:** Added a step to the GitHub Actions pipeline that updates the image version in Git right after each build, so ArgoCD always sees the change and rolls it out on its own.
 
 ### Locking down the web server broke it
 
-**Problem:** Running the web server as a non-root user is a standard security hardening step, but doing it broke the server outright — its default setup needs root-level access for its network port and file access.
+**Problem:** Running the nginx web server as a non-root user is a standard security hardening step, but doing it broke the server outright — nginx's default setup needs root-level access for its network port and file access.
 
-**Solution:** Reconfigured the server to use an unprivileged port and writable temp storage, so it runs securely without needing elevated permissions.
+**Solution:** Reconfigured nginx to use an unprivileged port and writable temp storage, so it runs securely without needing elevated permissions.
 
 ### The dashboard login password kept changing on its own
 
-**Problem:** The monitoring dashboard's admin password silently reset itself after routine updates, locking people out with no warning.
+**Problem:** Grafana's admin password silently reset itself after routine Helm chart updates, locking people out with no warning.
 
-**Solution:** Moved the password into a separate, stable location that updates don't touch, so login stays consistent going forward.
+**Solution:** Moved the password into a separate Kubernetes Secret that Helm updates don't touch, so login stays consistent going forward.
 
 ### Network security rules were being silently ignored
 
-**Problem:** Rules meant to restrict which services could talk to each other appeared to apply but did nothing — the underlying networking layer accepted them without error, then simply didn't enforce them.
+**Problem:** Kubernetes NetworkPolicy rules meant to restrict which services could talk to each other appeared to apply but did nothing — Flannel, the default networking layer in k3s, accepted them without error, then simply didn't enforce them.
 
-**Solution:** Replaced that networking layer with one (Cilium) that actually enforces the rules, closing the gap.
+**Solution:** Replaced Flannel with Cilium, a networking layer that actually enforces the rules, closing the gap.
 
 ### Config changes in Git weren't taking effect
 
-**Problem:** Settings changes were committed to Git as usual, but the live system kept running the old configuration — causing three days of dashboard login failures before the mismatch was found.
+**Problem:** Settings changes were committed to Git as usual, but the live system kept running the old configuration — causing three days of Grafana login failures before the mismatch was found.
 
-**Solution:** Set the deployment tool to manage its own configuration the same way it manages everything else, so any change committed to Git now applies automatically.
+**Solution:** Set ArgoCD to manage its own configuration the same way it manages everything else ("app of apps"), so any change committed to Git now applies automatically.
 
 ### Switching the network layer broke already-running services
 
-**Problem:** After upgrading the underlying networking system, services that were already running kept using stale, broken connections and started crashing.
+**Problem:** After migrating from Flannel to Cilium, services that were already running kept using stale, broken network connections and started crashing — including Prometheus, the monitoring tool, which couldn't reach the Kubernetes API.
 
 **Solution:** Restarted every running service right after the switch so each one picked up a fresh, working connection.
 
 ### A few services were missed in that restart
 
-**Problem:** Ten days after the networking upgrade, a handful of services were quietly still broken — they'd been running fine outwardly, so they were skipped during the initial restart.
+**Problem:** Ten days after the Cilium migration, a handful of services — including part of ArgoCD itself — were quietly still broken; they'd been running fine outwardly, so they were skipped during the initial restart.
 
 **Solution:** Turned "restart everything" into a standard, no-exceptions step after any future networking change, rather than relying on spotting which services look broken.
 
 ### A monitoring install crashed the server
 
-**Problem:** Installing the monitoring stack used more memory than the server had available, causing the whole server to become unresponsive.
+**Problem:** Installing Prometheus and Grafana (via the kube-prometheus-stack Helm chart) used more memory than the Hetzner server had available, causing the whole server to become unresponsive.
 
-**Solution:** Upgraded to a server with more RAM — a one-line config change with about 90 seconds of downtime.
+**Solution:** Upgraded to a Hetzner server with more RAM — a one-line Terraform change with about 90 seconds of downtime.
 
 ### Hosting costs doubled overnight for no clear reason
 
-**Problem:** The monthly bill jumped from ~$37 to $73 with no change in server size — caused by a pricing gap where the hosting provider kept older, more expensive server plans on sale only in its US locations after rolling out cheaper ones elsewhere.
+**Problem:** The monthly Hetzner bill jumped from ~$37 to $73 with no change in server size — caused by a pricing gap where Hetzner kept older, more expensive server plans on sale only in its US locations after rolling out cheaper ones in Europe.
 
-**Solution:** Migrated the server to a European data center, cutting the bill to $8.99/month — an 88% reduction — with no drop in performance, plus a minor DNS tweak to offset the added distance for US visitors.
+**Solution:** Migrated the server to Hetzner's Falkenstein, Germany data center, cutting the bill to $8.99/month — an 88% reduction — with no drop in performance, plus a Cloudflare proxy tweak to offset the added distance for US visitors.
 
 ### Useful metrics were being generated but never collected
 
-**Problem:** The site's traffic router was already producing detailed metrics internally, but nothing was set up to collect them, so that data was effectively invisible.
+**Problem:** Traefik, the ingress router handling site traffic, was already producing detailed Prometheus metrics internally, but nothing was set up to collect them, so that data was effectively invisible.
 
-**Solution:** Added a small monitoring config to start pulling those metrics into the dashboard.
+**Solution:** Added a small Prometheus monitoring config (a PodMonitor) to start pulling Traefik's metrics into Grafana.
 
