@@ -12,13 +12,12 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via 
 | **Ingress** | Traefik | HTTP/HTTPS routing (k3s built-in) |
 | **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
 | **TLS** | cert-manager + Let's Encrypt | Automatic certificate management |
-| **GitOps** | ArgoCD | Declarative, Git-driven deployments |
-| **GitOps (app-of-apps)** | ArgoCD root Application | Watches `manifests/argocd/` so Application manifest changes deploy automatically on push |
+| **GitOps** | ArgoCD (app-of-apps) | Declarative, Git-driven deployments; a root Application watches `manifests/argocd/` so Application manifest changes deploy automatically on push |
 | **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
 | **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
 | **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
 | **CNI** | Cilium (eBPF) | Pod networking + NetworkPolicy enforcement; replaced Flannel which silently ignores NetworkPolicy |
-| **Observability** | Prometheus + Grafana | Metrics and dashboards (Month 2) |
+| **Observability** | Prometheus + Grafana | Metrics and dashboards |
 | **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
 | **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
 
@@ -141,7 +140,7 @@ Real issues hit during the build, documented here because they're the kind of th
 
 **Problem:** Grafana's admin password silently reset itself after routine Helm chart updates, locking people out with no warning.
 
-**Solution:** Moved the password into a separate Kubernetes Secret that Helm updates don't touch, and added a 1GB persistent volume so Grafana's database survives pod restarts instead of resetting, so login stays consistent going forward.
+**Solution:** Moved the password into a separate Kubernetes Secret that Helm updates don't touch, and added a 1Gi persistent volume so Grafana's database survives pod restarts instead of resetting, so login stays consistent going forward.
 
 ### Network security rules were being silently ignored
 
