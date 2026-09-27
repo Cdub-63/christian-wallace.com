@@ -16,7 +16,7 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via 
 | **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
 | **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
 | **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
-| **CNI** | Cilium (eBPF) | Pod networking + NetworkPolicy enforcement; replaced Flannel which silently ignores NetworkPolicy |
+| **CNI** | Cilium (eBPF) | Pod networking, NetworkPolicy enforcement, and Service load balancing (replaces kube-proxy); replaced Flannel which silently ignores NetworkPolicy |
 | **Observability** | Prometheus + Grafana | Metrics and dashboards |
 | **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
 | **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
@@ -183,4 +183,10 @@ Real issues hit during the build, documented here because they're the kind of th
 **Problem:** Traefik, the ingress router handling site traffic, was already producing detailed Prometheus metrics internally, but nothing was set up to collect them, so that data was effectively invisible.
 
 **Solution:** Added a small Prometheus monitoring config (a PodMonitor) to start pulling Traefik's metrics into Grafana.
+
+### Cilium was installed, but the old tool was still routing service traffic
+
+**Problem:** Months after the Cilium migration, a check of `cilium-dbg status` showed `KubeProxyReplacement: False`. Cilium was handling pod networking and NetworkPolicy, but k3s's built-in kube-proxy was still translating every Service address through ~110 iptables rules. Nothing looked broken, so this went unnoticed. Removing kube-proxy also creates a chicken-and-egg problem: Cilium normally reaches the Kubernetes API through the `kubernetes` Service address, and that address only works if something is already routing Services.
+
+**Solution:** Enabled `kubeProxyReplacement` in the Cilium Helm values and pointed Cilium directly at the API server (`k8sServiceHost: 127.0.0.1`, port 6443) so it no longer depends on Service routing. Let ArgoCD roll that out first, with kube-proxy still running as a safety net, and confirmed Services still worked. Then disabled kube-proxy in k3s (`disable-kube-proxy: true` in `/etc/rancher/k3s/config.yaml`), restarted k3s, and flushed the leftover `KUBE-*` iptables rules. Service traffic is now handled by Cilium's eBPF datapath. One side effect: the k3s restart briefly took the API server offline, and ArgoCD cached an "apiserver not ready" error on one app until a hard refresh cleared it.
 
