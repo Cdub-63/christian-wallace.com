@@ -90,6 +90,7 @@ christian-wallace.com/
 │   ├── main.tf
 │   ├── variables.tf
 │   └── outputs.tf
+├── k3s/config.yaml     # Node-level k3s flags (/etc/rancher/k3s/config.yaml)
 ├── manifests/          # Kubernetes manifests (ArgoCD-managed)
 │   ├── argocd/
 │   ├── cert-manager/

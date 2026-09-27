@@ -1,0 +1,4 @@
+# Copy to /etc/rancher/k3s/config.yaml on the node. Cilium replaces Flannel, k3s netpol, and kube-proxy.
+flannel-backend: none
+disable-network-policy: true
+disable-kube-proxy: true
