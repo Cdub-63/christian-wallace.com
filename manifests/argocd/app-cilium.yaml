@@ -13,6 +13,10 @@ spec:
       values: |
         operator:
           replicas: 1
+        kubeProxyReplacement: true
+        # Single node: without kube-proxy, Cilium can't use the kubernetes ClusterIP to reach the API server
+        k8sServiceHost: 127.0.0.1
+        k8sServicePort: 6443
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
