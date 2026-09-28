@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: "*"
+    targetRevision: "91.8.1"
     helm:
       values: |
         # k3s binds these to 127.0.0.1 — scraping would fail

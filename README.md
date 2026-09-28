@@ -90,7 +90,9 @@ christian-wallace.com/
 │   ├── main.tf
 │   ├── variables.tf
 │   └── outputs.tf
-├── k3s/config.yaml     # Node-level k3s flags (/etc/rancher/k3s/config.yaml)
+├── k3s/
+│   ├── config.yaml         # Node-level k3s flags (/etc/rancher/k3s/config.yaml)
+│   └── argocd-values.yaml  # Overrides merged into the Helm-installed ArgoCD release
 ├── manifests/          # Kubernetes manifests (ArgoCD-managed)
 │   ├── argocd/
 │   ├── cert-manager/
@@ -190,4 +192,10 @@ Real issues hit during the build, documented here because they're the kind of th
 **Problem:** Months after the Cilium migration, a check of `cilium-dbg status` showed `KubeProxyReplacement: False`. Cilium was handling pod networking and NetworkPolicy, but k3s's built-in kube-proxy was still translating every Service address through ~110 iptables rules. Nothing looked broken, so this went unnoticed. Removing kube-proxy also creates a chicken-and-egg problem: Cilium normally reaches the Kubernetes API through the `kubernetes` Service address, and that address only works if something is already routing Services.
 
 **Solution:** Enabled `kubeProxyReplacement` in the Cilium Helm values and pointed Cilium directly at the API server (`k8sServiceHost: 127.0.0.1`, port 6443) so it no longer depends on Service routing. Let ArgoCD roll that out first, with kube-proxy still running as a safety net, and confirmed Services still worked. Then disabled kube-proxy in k3s (`disable-kube-proxy: true` in `/etc/rancher/k3s/config.yaml`), restarted k3s, and flushed the leftover `KUBE-*` iptables rules. Service traffic is now handled by Cilium's eBPF datapath. One side effect: the k3s restart briefly took the API server offline, and ArgoCD cached an "apiserver not ready" error on one app until a hard refresh cleared it.
+
+### Certificates depended on things ArgoCD didn't know about
+
+**Problem:** Every HTTPS certificate depends on cert-manager and its Let's Encrypt ClusterIssuers existing first, but both had been installed by hand (Helm and `kubectl apply`), outside ArgoCD. On a rebuilt cluster, ArgoCD would create the site and Grafana Ingresses with nothing in place to issue their certificates. Adding ArgoCD sync waves to fix the ordering had two catches. Waves only order resources inside a single Application, so they do nothing on resources ArgoCD doesn't manage. And in an app-of-apps setup, ArgoCD treats a child Application as healthy the moment it exists, so a later wave never actually waits for an earlier one to finish.
+
+**Solution:** Brought cert-manager (wave `-2`) and the ClusterIssuers (wave `-1`) under the root app as their own Applications, with everything else at the default wave `0`. Pinned the cert-manager chart to the exact version already installed (`v1.21.1`), since a floating version had caused trouble before (and pinned kube-prometheus-stack, which was still on `"*"`, to its running `91.8.1`), and checked with a server-side `kubectl diff` that ArgoCD's render matched the running resources before handing it over. Then turned the Application health check back on in `argocd-cm` (`k3s/argocd-values.yaml`) so root now waits for each wave to become healthy before starting the next.
 
