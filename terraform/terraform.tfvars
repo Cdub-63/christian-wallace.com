@@ -1,2 +1,1 @@
-# Secrets are not stored in files. Run terraform through 1Password:
-#   op run --env-file=.env.op -- terraform plan
+# Variables live in the HCP Terraform workspace (christian-wallace/christian-wallace-com), not in files.

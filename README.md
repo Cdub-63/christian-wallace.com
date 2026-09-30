@@ -103,17 +103,18 @@ christian-wallace.com/
 
 ## Local Setup
 
-**Prerequisites:** `kubectl`, `helm`, `terraform`, `k9s`, `hcloud`, 1Password CLI (`op`) with desktop-app integration on
+**Prerequisites:** `kubectl`, `helm`, `terraform`, `k9s`, `hcloud`
 
 ```bash
 # Clone
 git clone git@github.com:Cdub-63/christian-wallace.com.git
 cd christian-wallace.com
 
-# Provision infrastructure (tokens injected from 1Password via terraform/.env.op)
+# Infrastructure: HCP Terraform, VCS-driven. Push to main -> plan runs -> confirm apply in the HCP UI.
+# Tokens are sensitive workspace variables; local CLI plans run remotely (needs `terraform login`).
 cd terraform
 terraform init
-op run --env-file=.env.op -- terraform apply
+terraform plan
 
 # View cluster
 kubectl get pods -A

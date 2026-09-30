@@ -1,4 +1,11 @@
 terraform {
+  cloud {
+    organization = "christian-wallace"
+    workspaces {
+      name = "christian-wallace-com"
+    }
+  }
+
   required_providers {
     hcloud = {
       source  = "hetznercloud/hcloud"
@@ -57,7 +64,7 @@ resource "cloudflare_record" "grafana" {
 
 resource "hcloud_ssh_key" "default" {
   name       = "christian-mac"
-  public_key = file("~/.ssh/id_ed25519.pub")
+  public_key = file("${path.module}/ssh_key.pub")
 }
 
 resource "hcloud_firewall" "k3s" {
