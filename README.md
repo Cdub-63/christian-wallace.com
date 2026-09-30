@@ -103,20 +103,17 @@ christian-wallace.com/
 
 ## Local Setup
 
-**Prerequisites:** `kubectl`, `helm`, `terraform`, `k9s`, `hcloud`
+**Prerequisites:** `kubectl`, `helm`, `terraform`, `k9s`, `hcloud`, 1Password CLI (`op`) with desktop-app integration on
 
 ```bash
 # Clone
 git clone git@github.com:Cdub-63/christian-wallace.com.git
 cd christian-wallace.com
 
-# Add secrets (gitignored)
-echo 'hcloud_token = "..."' > terraform/terraform.tfvars.local
-
-# Provision infrastructure
+# Provision infrastructure (tokens injected from 1Password via terraform/.env.op)
 cd terraform
 terraform init
-terraform apply -var-file="terraform.tfvars.local"
+op run --env-file=.env.op -- terraform apply
 
 # View cluster
 kubectl get pods -A
