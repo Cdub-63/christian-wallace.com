@@ -12,7 +12,7 @@ Personal portfolio site — deployed via GitOps on k3s (Hetzner).
 ## Hard Rule: Infrastructure as Code Only
 
 Every infra change goes through code in this repo — never the Hetzner/Cloudflare consoles, `hcloud` CLI writes, or `kubectl apply/edit/patch` against the cluster.
-- Hetzner + Cloudflare: change `terraform/` and push to main. HCP Terraform (org `christian-wallace`, workspace `christian-wallace-com`, VCS-driven) plans on push; apply is confirmed in the HCP UI. `terraform plan` locally runs a speculative remote plan. Tokens are sensitive workspace vars (sourced from 1Password); never write them to files or print them. If something already exists outside Terraform, `terraform import` it — don't recreate or hand-edit.
+- Hetzner + Cloudflare: change `terraform/` and push to main. HCP Terraform (org `christian-wallace`, workspace `christian-wallace-com`, VCS-driven) plans and auto-applies on push (CLI apply is rejected). `terraform plan` locally runs a speculative remote plan. Tokens are sensitive workspace vars (sourced from 1Password); never write them to files or print them. If something already exists outside Terraform, `terraform import` it — don't recreate or hand-edit.
 - Kubernetes: change `manifests/` (or `k3s/` for node config), commit, let ArgoCD sync. Read-only `kubectl get/describe/logs` is fine.
 - `terraform plan` must show no changes after any infra work; drift means something was done by hand and must be codified or reverted.
 - If a manual step is truly unavoidable (e.g. break-glass), codify it in the same session and note why in the commit.

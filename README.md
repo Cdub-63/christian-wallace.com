@@ -7,7 +7,8 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via 
 | Layer | Tool | Purpose |
 |---|---|---|
 | **DNS** | Cloudflare | Domain management, proxying |
-| **Infrastructure** | Terraform + Hetzner | Server provisioning as code |
+| **Infrastructure** | Terraform + Hetzner | Server, firewall, SSH key, and DNS records as code |
+| **Infra GitOps** | HCP Terraform (VCS-driven) | Remote state with locking and history; a push touching `terraform/` plans and auto-applies, the Terraform equivalent of ArgoCD |
 | **Kubernetes** | k3s | Lightweight single-node cluster |
 | **Ingress** | Traefik | HTTP/HTTPS routing (k3s built-in) |
 | **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
@@ -30,6 +31,7 @@ graph TB
     GH[GitHub<br/>Cdub-63/christian-wallace.com]
     Actions[GitHub Actions<br/>Build + Push]
     GHCR[GHCR<br/>ghcr.io/cdub-63/christian-wallace-site]
+    HCP[HCP Terraform<br/>state + plan/apply]
 
     subgraph Hetzner ["Hetzner CX33, Falkenstein, DE (178.105.67.27)"]
         subgraph k3s ["k3s Cluster"]
@@ -55,6 +57,9 @@ graph TB
     CF -->|A record → 178.105.67.27, proxied| Traefik
     Traefik --> Site
     GH -->|push triggers| Actions
+    GH -->|push to terraform/| HCP
+    HCP -->|auto-apply| Hetzner
+    HCP -->|auto-apply| CF
     Actions -->|docker push| GHCR
     GH -->|polls for changes| ArgoCD
     ArgoCD -->|reconcile manifests| Site
@@ -67,7 +72,7 @@ graph TB
 
 Every tool here replaces something painful. This is what the stack looks like without it:
 
-**Without Terraform:** Hetzner server, firewall, and SSH key would be manual console clicks with no record of what was done. `terraform apply` rebuilds all of it from scratch in 30 seconds.
+**Without Terraform:** Hetzner server, firewall, and SSH key would be manual console clicks with no record of what was done. A push to `terraform/` rebuilds all of it from scratch in about 30 seconds.
 
 **Without Cloudflare DNS-as-code:** Reprovisioning the server would mean remembering to manually update the A record with the new IP. Terraform updates it automatically on every apply.
 
@@ -76,6 +81,8 @@ Every tool here replaces something painful. This is what the stack looks like wi
 **Without Traefik:** Every service would need its own public port. Traefik routes all traffic on `:443` by hostname, so `christian-wallace.com` and `argocd.christian-wallace.com` share one IP.
 
 **Without Helm:** Installing cert-manager would mean downloading a ~1,000-line YAML file, applying it blind, and losing any record of what version or overrides are in place. Helm tracks both, and `helm rollback` undoes a bad upgrade in one command.
+
+**Without HCP Terraform:** State would live in a gitignored file on one laptop, with no locking and no way to apply from another machine. HCP holds the state and runs plan/apply on every push, so Git is the only way infrastructure changes.
 
 **Without ArgoCD:** Deploying would mean SSHing in or running `kubectl apply` from a laptop, with no rollback and no record of what changed. ArgoCD reconciles the cluster to Git on every push; rollback is `git revert`.
 
@@ -86,10 +93,12 @@ Every tool here replaces something painful. This is what the stack looks like wi
 ```
 christian-wallace.com/
 ├── Dockerfile          # nginx:alpine image with site/ baked in
-├── terraform/          # Hetzner server + firewall provisioning
+├── terraform/          # Hetzner + Cloudflare, applied by HCP Terraform on push
 │   ├── main.tf
 │   ├── variables.tf
-│   └── outputs.tf
+│   ├── outputs.tf
+│   ├── ssh_key.pub         # Public key for the server (read by remote runs)
+│   └── .terraform.lock.hcl # Pinned provider versions
 ├── k3s/
 │   ├── config.yaml         # Node-level k3s flags (/etc/rancher/k3s/config.yaml)
 │   └── argocd-values.yaml  # Overrides merged into the Helm-installed ArgoCD release
@@ -110,8 +119,9 @@ christian-wallace.com/
 git clone git@github.com:Cdub-63/christian-wallace.com.git
 cd christian-wallace.com
 
-# Infrastructure: HCP Terraform, VCS-driven. Push to main -> plan runs -> confirm apply in the HCP UI.
-# Tokens are sensitive workspace variables; local CLI plans run remotely (needs `terraform login`).
+# Infrastructure: HCP Terraform, VCS-driven. Push to main -> plan -> auto-apply.
+# Tokens are sensitive workspace variables. Local `terraform plan` runs remotely (needs `terraform login`);
+# `terraform apply` from the CLI is rejected because Git is the source of truth.
 cd terraform
 terraform init
 terraform plan
@@ -197,3 +207,8 @@ Real issues hit during the build, documented here because they're the kind of th
 
 **Solution:** Brought cert-manager (wave `-2`) and the ClusterIssuers (wave `-1`) under the root app as their own Applications, with everything else at the default wave `0`. Pinned the cert-manager chart to the exact version already installed (`v1.21.1`), since a floating version had caused trouble before (and pinned kube-prometheus-stack, which was still on `"*"`, to its running `91.8.1`), and checked with a server-side `kubectl diff` that ArgoCD's render matched the running resources before handing it over. Then turned the Application health check back on in `argocd-cm` (`k3s/argocd-values.yaml`) so root now waits for each wave to become healthy before starting the next.
 
+### Terraform state lived on one laptop and fell out of date
+
+**Problem:** Terraform's state file, its record of what it manages, was gitignored and existed only on one Mac. The Falkenstein migration was done from a Windows machine that had no state, so the Mac's state still described the deleted Ashburn server. Running `terraform apply` there would have created a second server and pointed all DNS at it. There was also no locking, and no way to apply from anywhere else.
+
+**Solution:** Removed the dead server from state and ran `terraform import` on the live one, with `ignore_changes = [ssh_keys]` because Hetzner's API doesn't return SSH keys and the import otherwise forces a replacement. Ran a refresh-only apply to record the manual DNS changes, then moved state to HCP Terraform and connected the workspace to this repo with auto-apply. API tokens are sensitive workspace variables sourced from 1Password, and CLI applies are rejected, so a push is now the only way infrastructure changes, the same as ArgoCD for the cluster.
