@@ -121,7 +121,7 @@ christian-wallace.com/
 git clone git@github.com:Cdub-63/christian-wallace.com.git
 cd christian-wallace.com
 
-# Infrastructure: HCP Terraform, VCS-driven. Push to main -> plan -> auto-apply.
+# Infrastructure: HCP Terraform, VCS-driven. PR to main -> speculative plan posted as a check -> merge -> auto-apply.
 # Tokens are sensitive workspace variables. Local `terraform plan` runs remotely (needs `terraform login`);
 # `terraform apply` from the CLI is rejected because Git is the source of truth.
 cd terraform
