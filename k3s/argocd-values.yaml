@@ -1,6 +1,8 @@
-# Merged into the Helm-managed ArgoCD release (argo-cd chart 10.3.0):
-#   helm upgrade argocd argo/argo-cd -n argocd --version 10.3.0 --reuse-values -f k3s/argocd-values.yaml
+# ArgoCD's own Helm values: used by cloud-init at bootstrap, then by manifests/argocd/app-argocd.yaml
 configs:
+  params:
+    # TLS terminates at Traefik
+    server.insecure: true
   cm:
     # Without this, child Applications report Healthy as soon as they exist, so root's sync waves don't wait for them
     resource.customizations.health.argoproj.io_Application: |

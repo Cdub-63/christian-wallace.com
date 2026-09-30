@@ -1,0 +1,44 @@
+#cloud-config
+# Runs once at server creation. Brings up k3s + Cilium + ArgoCD, then hands everything else to ArgoCD (root app).
+write_files:
+  - path: /usr/local/sbin/bootstrap-k3s.sh
+    permissions: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euxo pipefail
+      export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+      K3S_VERSION=v1.36.3+k3s1
+      HELM_VERSION=v4.2.1
+
+      git clone --depth 1 https://github.com/Cdub-63/christian-wallace.com /opt/christian-wallace.com
+      cd /opt/christian-wallace.com
+
+      mkdir -p /etc/rancher/k3s
+      cp k3s/config.yaml /etc/rancher/k3s/config.yaml
+      curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="$K3S_VERSION" sh -
+
+      curl -fsSL "https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz" | tar xz -C /tmp
+      install /tmp/linux-amd64/helm /usr/local/bin/helm
+
+      # Read chart versions from the ArgoCD Applications so bootstrap and GitOps can't disagree
+      chart_version() { grep -A1 "chart: $1" "manifests/argocd/$2" | awk '/targetRevision/ {gsub(/"/, "", $2); print $2}'; }
+
+      until kubectl get --raw /readyz >/dev/null 2>&1; do sleep 5; done
+      # No CNI until Cilium is up, so ArgoCD can't install it
+      helm install cilium cilium --repo https://helm.cilium.io -n kube-system \
+        --version "$(chart_version cilium app-cilium.yaml)" -f k3s/cilium-values.yaml --wait
+      kubectl wait --for=condition=Ready node --all --timeout=300s
+
+      helm install argocd argo-cd --repo https://argoproj.github.io/argo-helm -n argocd --create-namespace \
+        --version "$(chart_version argo-cd app-argocd.yaml)" -f k3s/argocd-values.yaml --wait
+
+      # Grafana reads its admin login from this Secret; retrieve with:
+      #   kubectl -n monitoring get secret grafana-admin-creds -o jsonpath='{.data.admin-password}' | base64 -d
+      kubectl create namespace monitoring
+      kubectl -n monitoring create secret generic grafana-admin-creds \
+        --from-literal=admin-user=admin --from-literal=admin-password="$(openssl rand -base64 24)"
+
+      kubectl apply -f manifests/argocd/root-app.yaml
+
+runcmd:
+  - [/usr/local/sbin/bootstrap-k3s.sh]

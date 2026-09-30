@@ -106,13 +106,18 @@ resource "hcloud_server" "k3s" {
   location    = "fsn1"
   ssh_keys    = [hcloud_ssh_key.default.id]
   firewall_ids = [hcloud_firewall.k3s.id]
+  user_data   = file("${path.module}/cloud-init.yaml")
 
   labels = {
     role = "k3s-control-plane"
   }
 
+  # Pushes auto-apply, so a bad commit must not be able to delete the server.
+  # To rebuild on purpose: remove prevent_destroy in one commit, then replace.
+  # user_data only runs at creation; ignoring it stops bootstrap edits from forcing a rebuild.
   # Hetzner's API doesn't return ssh_keys, so any import shows a forced replacement.
   lifecycle {
-    ignore_changes = [ssh_keys]
+    prevent_destroy = true
+    ignore_changes  = [ssh_keys, user_data]
   }
 }

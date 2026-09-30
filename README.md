@@ -97,11 +97,13 @@ christian-wallace.com/
 │   ├── main.tf
 │   ├── variables.tf
 │   ├── outputs.tf
+│   ├── cloud-init.yaml     # First-boot bootstrap: k3s, Cilium, ArgoCD, root app
 │   ├── ssh_key.pub         # Public key for the server (read by remote runs)
 │   └── .terraform.lock.hcl # Pinned provider versions
 ├── k3s/
-│   ├── config.yaml         # Node-level k3s flags (/etc/rancher/k3s/config.yaml)
-│   └── argocd-values.yaml  # Overrides merged into the Helm-installed ArgoCD release
+│   ├── config.yaml         # Node-level k3s flags (/etc/rancher/k3s/config.yaml), written by cloud-init
+│   ├── cilium-values.yaml  # Cilium Helm values, shared by cloud-init and ArgoCD
+│   └── argocd-values.yaml  # ArgoCD Helm values, shared by cloud-init and ArgoCD (which manages itself)
 ├── manifests/          # Kubernetes manifests (ArgoCD-managed)
 │   ├── argocd/
 │   ├── cert-manager/
@@ -212,3 +214,9 @@ Real issues hit during the build, documented here because they're the kind of th
 **Problem:** Terraform's state file, its record of what it manages, was gitignored and existed only on one Mac. The Falkenstein migration was done from a Windows machine that had no state, so the Mac's state still described the deleted Ashburn server. Running `terraform apply` there would have created a second server and pointed all DNS at it. There was also no locking, and no way to apply from anywhere else.
 
 **Solution:** Removed the dead server from state and ran `terraform import` on the live one, with `ignore_changes = [ssh_keys]` because Hetzner's API doesn't return SSH keys and the import otherwise forces a replacement. Ran a refresh-only apply to record the manual DNS changes, then moved state to HCP Terraform and connected the workspace to this repo with auto-apply. API tokens are sensitive workspace variables sourced from 1Password, and CLI applies are rejected, so a push is now the only way infrastructure changes, the same as ArgoCD for the cluster.
+
+### Replacing the server would have produced an empty machine
+
+**Problem:** Terraform created a bare Ubuntu server, but k3s, Cilium, ArgoCD, and the Grafana login Secret had all been installed by hand, and ArgoCD's own Helm release was upgraded manually with a values file that had already drifted from the live release (`server.insecure` was set on the cluster but missing from Git). A push that replaced the server would have left the site down until someone rebuilt the cluster by hand. With auto-apply on, nothing stopped a bad commit from deleting the server either.
+
+**Solution:** Added a cloud-init script to the Terraform server that clones this repo on first boot, installs k3s with `k3s/config.yaml`, installs Cilium first (no pod can start without a network layer, so ArgoCD can't install it), installs ArgoCD, creates the Grafana Secret with a random password, and applies the root app. Chart versions are read from the ArgoCD Application files so bootstrap and GitOps can't disagree. ArgoCD now manages its own Helm release through an Application, checked against the live cluster with a server-side diff first. The server has `prevent_destroy`, so rebuilding it takes a deliberate commit, and `user_data` is in `ignore_changes` so editing the bootstrap never forces a rebuild.

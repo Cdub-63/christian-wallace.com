@@ -1,0 +1,7 @@
+# Cilium Helm values: used by cloud-init at bootstrap, then by manifests/argocd/app-cilium.yaml
+operator:
+  replicas: 1
+kubeProxyReplacement: true
+# Single node: without kube-proxy, Cilium can't use the kubernetes ClusterIP to reach the API server
+k8sServiceHost: 127.0.0.1
+k8sServicePort: 6443
