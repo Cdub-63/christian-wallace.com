@@ -103,4 +103,9 @@ resource "hcloud_server" "k3s" {
   labels = {
     role = "k3s-control-plane"
   }
+
+  # Hetzner's API doesn't return ssh_keys, so any import shows a forced replacement.
+  lifecycle {
+    ignore_changes = [ssh_keys]
+  }
 }
