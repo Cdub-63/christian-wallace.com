@@ -21,6 +21,8 @@ Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via 
 | **Observability** | Prometheus + Grafana | Metrics and dashboards |
 | **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
 | **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
+| **Alerting** | Alertmanager + Discord | Routes Prometheus alerts (including memory-near-limit and OOMKill rules) to a Discord channel |
+| **Dead man's switch** | healthchecks.io | Alertmanager pings it every minute via the always-firing `Watchdog` alert; if pings stop for ~10 minutes, it posts to Discord |
 
 ## Infrastructure Diagram
 
@@ -85,6 +87,10 @@ Every tool here replaces something painful. This is what the stack looks like wi
 **Without HCP Terraform:** State would live in a gitignored file on one laptop, with no locking and no way to apply from another machine. HCP holds the state and runs plan/apply on every push, so Git is the only way infrastructure changes.
 
 **Without ArgoCD:** Deploying would mean SSHing in or running `kubectl apply` from a laptop, with no rollback and no record of what changed. ArgoCD reconciles the cluster to Git on every push; rollback is `git revert`.
+
+**Without Alertmanager routing:** Alerts fire but go nowhere. Grafana was OOMKilled about 30 times in one week and nobody knew until it was spotted by hand. Now every warning and critical alert lands in Discord.
+
+**Without a dead man's switch:** If Prometheus, Alertmanager, or the node dies, alerts stop, and silence looks exactly like "everything is fine." The `Watchdog` alert always fires on purpose and is routed to healthchecks.io once a minute. When the pings stop, healthchecks.io, which runs outside the cluster, raises the alarm. Coverage is layered: UptimeRobot catches the site being down from outside, Alertmanager catches problems inside the cluster, and healthchecks.io catches the monitoring itself being broken.
 
 **Without Docker + GitHub Actions:** Site updates would mean cramming HTML into a 600-line ConfigMap and committing the generated file. A Dockerfile bakes HTML into an image; Actions builds and pushes it to GHCR on every push.
 
