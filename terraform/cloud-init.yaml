@@ -38,9 +38,10 @@ write_files:
       kubectl -n monitoring create secret generic grafana-admin-creds \
         --from-literal=admin-user=admin --from-literal=admin-password="$(openssl rand -base64 24)"
 
-      # Placeholder so Alertmanager can start; replace with the real webhook from 1Password after boot
+      # Placeholders so Alertmanager can start; replace both from op://K3s/alertmanager-discord after boot
       kubectl -n monitoring create secret generic alertmanager-discord \
-        --from-literal=webhook-url=https://discord.com/api/webhooks/placeholder
+        --from-literal=webhook-url=https://discord.com/api/webhooks/placeholder \
+        --from-literal=healthchecks-url=http://localhost/placeholder
 
       kubectl apply -f manifests/argocd/root-app.yaml
 
