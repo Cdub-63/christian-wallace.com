@@ -27,4 +27,4 @@ Every infra change goes through code in this repo — never the Hetzner/Cloudfla
 - **GitOps:** ArgoCD (auto-sync + self-heal)
 - **CI/CD:** GitHub Actions — builds Docker image, pushes to GHCR, updates image tag + change-cause annotation in `manifests/site/deployment.yaml`, commits back
 - **Site:** nginx:alpine (non-root, port 8080), HTML in `site/`
-- **Observability:** kube-prometheus-stack in `monitoring` namespace; Grafana at grafana.christian-wallace.com
+- **Observability:** kube-prometheus-stack in `monitoring` namespace; Grafana at grafana.christian-wallace.com. Alertmanager routes alerts to Discord and pings healthchecks.io every minute from `Watchdog` (dead man's switch); both URLs live in the `alertmanager-discord` Secret, sourced from `op://K3s/alertmanager-discord/{webhook-url,healthchecks-url}`
