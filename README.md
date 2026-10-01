@@ -2,27 +2,8 @@
 
 Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via GitOps on a self-managed k3s cluster.
 
-## Tech Stack
-
-| Layer | Tool | Purpose |
-|---|---|---|
-| **DNS** | Cloudflare | Domain management, proxying |
-| **Infrastructure** | Terraform + Hetzner | Server, firewall, SSH key, and DNS records as code |
-| **Infra GitOps** | HCP Terraform (VCS-driven) | Remote state with locking and history; a push touching `terraform/` plans and auto-applies, the Terraform equivalent of ArgoCD |
-| **Kubernetes** | k3s | Lightweight single-node cluster |
-| **Ingress** | Traefik | HTTP/HTTPS routing (k3s built-in) |
-| **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
-| **TLS** | cert-manager + Let's Encrypt | Automatic certificate management |
-| **GitOps** | ArgoCD (app-of-apps) | Declarative, Git-driven deployments; a root Application watches `manifests/argocd/` so Application manifest changes deploy automatically on push |
-| **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
-| **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
-| **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
-| **CNI** | Cilium (eBPF) | Pod networking, NetworkPolicy enforcement, and Service load balancing (replaces kube-proxy); replaced Flannel which silently ignores NetworkPolicy |
-| **Observability** | Prometheus + Grafana | Metrics and dashboards |
-| **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
-| **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
-| **Alerting** | Alertmanager + Discord | Routes Prometheus alerts (including memory-near-limit and OOMKill rules) to a Discord channel |
-| **Dead man's switch** | healthchecks.io | Alertmanager pings it every minute via the always-firing `Watchdog` alert; if pings stop for ~10 minutes, it posts to Discord |
+- [How each tool earns its place](docs/why-each-tool.md): what the stack would look like without each piece
+- [Challenges & lessons learned](docs/lessons-learned.md): real issues hit during the build and how they were fixed
 
 ## Infrastructure Diagram
 
@@ -95,7 +76,24 @@ christian-wallace.com/
 └── .github/workflows/  # GitHub Actions: build + push to GHCR
 ```
 
-## More
+## Tech Stack
 
-- [How each tool earns its place](docs/why-each-tool.md): what the stack would look like without each piece
-- [Challenges & lessons learned](docs/lessons-learned.md): real issues hit during the build and how they were fixed
+| Layer | Tool | Purpose |
+|---|---|---|
+| **DNS** | Cloudflare | Domain management, proxying |
+| **Infrastructure** | Terraform + Hetzner | Server, firewall, SSH key, and DNS records as code |
+| **Infra GitOps** | HCP Terraform (VCS-driven) | Remote state with locking and history; a push touching `terraform/` plans and auto-applies, the Terraform equivalent of ArgoCD |
+| **Kubernetes** | k3s | Lightweight single-node cluster |
+| **Ingress** | Traefik | HTTP/HTTPS routing (k3s built-in) |
+| **Package manager** | Helm | Install and upgrade cluster apps (cert-manager, ArgoCD) |
+| **TLS** | cert-manager + Let's Encrypt | Automatic certificate management |
+| **GitOps** | ArgoCD (app-of-apps) | Declarative, Git-driven deployments; a root Application watches `manifests/argocd/` so Application manifest changes deploy automatically on push |
+| **CI/CD** | GitHub Actions | Build and push image on changes to site or Dockerfile |
+| **Container image** | Docker + nginx:alpine | HTML files baked into image at build time |
+| **Container registry** | GHCR | Stores versioned Docker images alongside the repo |
+| **CNI** | Cilium (eBPF) | Pod networking, NetworkPolicy enforcement, and Service load balancing (replaces kube-proxy); replaced Flannel which silently ignores NetworkPolicy |
+| **Observability** | Prometheus + Grafana | Metrics and dashboards |
+| **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
+| **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
+| **Alerting** | Alertmanager + Discord | Routes Prometheus alerts (including memory-near-limit and OOMKill rules) to a Discord channel |
+| **Dead man's switch** | healthchecks.io | Alertmanager pings it every minute via the always-firing `Watchdog` alert; if pings stop for ~10 minutes, it posts to Discord |
