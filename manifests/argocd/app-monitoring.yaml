@@ -65,8 +65,63 @@ spec:
               limits:
                 memory: 128Mi
 
+        additionalPrometheusRulesMap:
+          container-memory:
+            groups:
+              - name: container-memory
+                rules:
+                  - alert: ContainerMemoryNearLimit
+                    expr: |
+                      max by (namespace, pod, container) (container_memory_working_set_bytes{container!=""})
+                        / on (namespace, pod, container)
+                      max by (namespace, pod, container) (kube_pod_container_resource_limits{resource="memory"})
+                        > 0.9
+                    for: 15m
+                    labels:
+                      severity: warning
+                    annotations:
+                      summary: "{{ $labels.namespace }}/{{ $labels.pod }} {{ $labels.container }} is at {{ $value | humanizePercentage }} of its memory limit"
+                  - alert: ContainerOOMKilled
+                    expr: |
+                      increase(kube_pod_container_status_restarts_total[10m]) > 0
+                        and on (namespace, pod, container)
+                      kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} == 1
+                    labels:
+                      severity: warning
+                    annotations:
+                      summary: "{{ $labels.namespace }}/{{ $labels.pod }} {{ $labels.container }} was OOMKilled"
+
         alertmanager:
+          config:
+            route:
+              group_by: [namespace, alertname]
+              group_wait: 30s
+              group_interval: 5m
+              repeat_interval: 12h
+              receiver: discord
+              routes:
+                - receiver: "null"
+                  matchers:
+                    - alertname =~ "InfoInhibitor|Watchdog"
+            receivers:
+              - name: "null"
+              - name: discord
+                discord_configs:
+                  - webhook_url_file: /etc/alertmanager/secrets/alertmanager-discord/webhook-url
+            inhibit_rules:
+              - source_matchers: [severity = critical]
+                target_matchers: [severity =~ warning|info]
+                equal: [namespace, alertname]
+              - source_matchers: [severity = warning]
+                target_matchers: [severity = info]
+                equal: [namespace, alertname]
+              - source_matchers: [alertname = InfoInhibitor]
+                target_matchers: [severity = info]
+                equal: [namespace]
+              - target_matchers: [alertname = InfoInhibitor]
           alertmanagerSpec:
+            secrets:
+              - alertmanager-discord
             resources:
               requests:
                 cpu: 10m
