@@ -100,11 +100,22 @@ spec:
               repeat_interval: 12h
               receiver: discord
               routes:
+                # Watchdog always fires; healthchecks.io alerts if these pings stop
+                - receiver: deadmans-switch
+                  matchers:
+                    - alertname = Watchdog
+                  group_wait: 0s
+                  group_interval: 1m
+                  repeat_interval: 1m
                 - receiver: "null"
                   matchers:
-                    - alertname =~ "InfoInhibitor|Watchdog"
+                    - alertname = InfoInhibitor
             receivers:
               - name: "null"
+              - name: deadmans-switch
+                webhook_configs:
+                  - url_file: /etc/alertmanager/secrets/alertmanager-discord/healthchecks-url
+                    send_resolved: false
               - name: discord
                 discord_configs:
                   - webhook_url_file: /etc/alertmanager/secrets/alertmanager-discord/webhook-url
