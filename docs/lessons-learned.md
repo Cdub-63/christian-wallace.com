@@ -91,3 +91,9 @@ Real issues hit during the build, documented here because they're the kind of th
 **Problem:** Grafana restarted with `OOMKilled` (exit 137) after about two days. Its memory limit was 256Mi, but `kubectl top` showed it using 246Mi only hours after starting, so normal use left almost no headroom. The two sidecar containers that load dashboards and datasources had no requests or limits, so the scheduler didn't count them and they could grow without bound.
 
 **Solution:** Raised Grafana to 512Mi and gave the sidecars 128Mi, with requests equal to limits for memory. When request equals limit, the scheduler reserves exactly what the pod is allowed to use, so the node can't be overcommitted on memory and a spike can't take memory other pods were counting on. The pod had actually restarted around 30 times in a week, which only came out when Prometheus was queried, because Alertmanager was sending every alert to a `null` receiver. Alerts now go to Discord, including new rules for a container above 90% of its memory limit and for any OOMKill.
+
+## Prometheus kept running close to its memory limit
+
+**Problem:** The new memory alert fired for Prometheus at about 95% of its 512Mi limit, then resolved on its own. It had not been OOMKilled (restart count 0). Prometheus holds the last two hours of samples in memory and writes them to disk every two hours, so its memory use rises steadily and then drops after each write. At 512Mi the high points came within a few percent of the limit, so any growth in the number of tracked series would have caused OOMKills.
+
+**Solution:** Raised the Prometheus memory request and limit to 1Gi, keeping request equal to limit as was done for Grafana. The alert resolving by itself didn't mean the problem had gone away. The value in the resolved message was the last reading before memory dropped, and that pattern repeats every two hours.
