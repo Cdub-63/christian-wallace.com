@@ -97,3 +97,9 @@ Real issues hit during the build, documented here because they're the kind of th
 **Problem:** The new memory alert fired for Prometheus at about 95% of its 512Mi limit, then resolved on its own. It had not been OOMKilled (restart count 0). Prometheus holds the last two hours of samples in memory and writes them to disk every two hours, so its memory use rises steadily and then drops after each write. At 512Mi the high points came within a few percent of the limit, so any growth in the number of tracked series would have caused OOMKills.
 
 **Solution:** Raised the Prometheus memory request and limit to 1Gi, keeping request equal to limit as was done for Grafana. The alert resolving by itself didn't mean the problem had gone away. The value in the resolved message was the last reading before memory dropped, and that pattern repeats every two hours.
+
+## The site had no health checks
+
+**Problem:** An audit of the cluster's workloads found the site's pod had no liveness or readiness probes. Kubernetes only knew the nginx process existed, not whether it could serve pages. A hung nginx would have stayed `Running` and kept receiving traffic, and during a rollout the new pod could get traffic before it was ready.
+
+**Solution:** Added an HTTP readiness probe on `/` so the pod only gets traffic once nginx is actually serving, and a shallow TCP liveness probe on port 8080 so Kubernetes restarts the container if nginx stops listening. Liveness is kept shallow on purpose, because a deeper check could restart a healthy pod over a slow response. The first rollout logged one `connection refused` readiness failure because the probe ran before nginx had bound its port, so readiness now waits 2 seconds before its first check.
