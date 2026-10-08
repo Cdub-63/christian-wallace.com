@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tailscale-ingresses
+  namespace: argocd
+  annotations:
+    # The tailscale IngressClass comes from the operator chart
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Cdub-63/christian-wallace.com
+    targetRevision: HEAD
+    path: manifests/tailscale
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
