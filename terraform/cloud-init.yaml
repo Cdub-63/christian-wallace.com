@@ -43,6 +43,11 @@ write_files:
         --from-literal=webhook-url=https://discord.com/api/webhooks/placeholder \
         --from-literal=healthchecks-url=http://localhost/placeholder
 
+      # Placeholder so the Tailscale operator's pod can be created; replace from op://Personal/Tailscale after boot
+      kubectl create namespace tailscale
+      kubectl -n tailscale create secret generic operator-oauth \
+        --from-literal=client_id=placeholder --from-literal=client_secret=placeholder
+
       kubectl apply -f manifests/argocd/root-app.yaml
 
 runcmd:

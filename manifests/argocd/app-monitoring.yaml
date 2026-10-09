@@ -40,17 +40,6 @@ spec:
             existingSecret: grafana-admin-creds
             userKey: admin-user
             passwordKey: admin-password
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            annotations:
-              cert-manager.io/cluster-issuer: letsencrypt-prod
-            hosts:
-              - grafana.christian-wallace.com
-            tls:
-              - secretName: grafana-tls
-                hosts:
-                  - grafana.christian-wallace.com
           resources:
             requests:
               cpu: 25m
