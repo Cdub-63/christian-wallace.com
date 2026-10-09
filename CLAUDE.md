@@ -5,8 +5,8 @@ Personal portfolio site — deployed via GitOps on k3s (Hetzner).
 ## Access
 
 - **SSH:** `ssh k3s` (root@178.105.67.27, Falkenstein)
-- **ArgoCD:** https://argocd.christian-wallace.com
-- **Grafana:** https://grafana.christian-wallace.com
+- **ArgoCD:** https://argocd.tailba717.ts.net (Tailscale only)
+- **Grafana:** https://grafana.tailba717.ts.net (Tailscale only)
 - **Site:** https://christian-wallace.com
 
 ## Hard Rule: Infrastructure as Code Only
@@ -23,8 +23,9 @@ Every infra change goes through code in this repo — never the Hetzner/Cloudfla
 
 - **Infra-as-code:** Terraform (hcloud + cloudflare providers) in `terraform/`
 - **Kubernetes:** k3s single-node, manifests in `manifests/`
-- **Ingress:** Traefik (k3s built-in), TLS via cert-manager + Let's Encrypt
+- **Ingress:** Traefik (k3s built-in), TLS via cert-manager + Let's Encrypt, for the public site only
+- **Admin UIs:** Grafana and ArgoCD are reachable only over Tailscale, via the Tailscale operator's ingresses in `manifests/tailscale/` (TLS from Tailscale). Operator OAuth client lives in the `operator-oauth` Secret in `tailscale`, sourced from `op://Personal/Tailscale/{Client ID,Client secret}`
 - **GitOps:** ArgoCD (auto-sync + self-heal)
 - **CI/CD:** GitHub Actions — builds Docker image, pushes to GHCR, updates image tag + change-cause annotation in `manifests/site/deployment.yaml`, commits back
 - **Site:** nginx:alpine (non-root, port 8080), HTML in `site/`
-- **Observability:** kube-prometheus-stack in `monitoring` namespace; Grafana at grafana.christian-wallace.com. Alertmanager routes alerts to Discord and pings healthchecks.io every minute from `Watchdog` (dead man's switch); both URLs live in the `alertmanager-discord` Secret, sourced from `op://K3s/alertmanager-discord/{webhook-url,healthchecks-url}`
+- **Observability:** kube-prometheus-stack in `monitoring` namespace; Grafana at grafana.tailba717.ts.net. Alertmanager routes alerts to Discord and pings healthchecks.io every minute from `Watchdog` (dead man's switch); both URLs live in the `alertmanager-discord` Secret, sourced from `op://K3s/alertmanager-discord/{webhook-url,healthchecks-url}`
