@@ -15,6 +15,10 @@ terraform {
       source  = "cloudflare/cloudflare"
       version = "~> 4.0"
     }
+    uptimerobot = {
+      source  = "uptimerobot/uptimerobot"
+      version = "~> 1.12"
+    }
   }
 }
 
@@ -24,6 +28,10 @@ provider "hcloud" {
 
 provider "cloudflare" {
   api_token = var.cloudflare_token
+}
+
+provider "uptimerobot" {
+  api_key = var.uptimerobot_api_key
 }
 
 resource "cloudflare_record" "root" {
@@ -102,4 +110,32 @@ resource "hcloud_server" "k3s" {
     prevent_destroy = true
     ignore_changes  = [ssh_keys, user_data]
   }
+}
+
+import {
+  to = uptimerobot_monitor.site
+  id = "803335422"
+}
+
+resource "uptimerobot_monitor" "site" {
+  name                        = "christian-wallace.com"
+  type                        = "HTTP"
+  url                         = "https://christian-wallace.com"
+  interval                    = 300
+  timeout                     = 30
+  http_method_type            = "HEAD"
+  follow_redirections         = true
+  success_http_response_codes = ["2xx", "3xx"]
+
+  region_data = {
+    regions = ["na"]
+  }
+
+  assigned_alert_contacts = [
+    {
+      alert_contact_id = "8540612"
+      threshold        = 0
+      recurrence       = 0
+    }
+  ]
 }
