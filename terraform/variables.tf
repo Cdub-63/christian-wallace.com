@@ -11,3 +11,8 @@ variable "cloudflare_token" {
 variable "cloudflare_zone_id" {
   description = "Cloudflare Zone ID for christian-wallace.com"
 }
+
+variable "uptimerobot_api_key" {
+  description = "UptimeRobot main API key"
+  sensitive   = true
+}

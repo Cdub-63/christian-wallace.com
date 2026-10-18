@@ -48,3 +48,20 @@ provider "registry.terraform.io/hetznercloud/hcloud" {
     "zh:fa4b87e313b8c3037ea517e8008caa8852ef71ba867f38e4e3c86488f6d5889a",
   ]
 }
+
+provider "registry.terraform.io/uptimerobot/uptimerobot" {
+  version     = "1.12.1"
+  constraints = "~> 1.12"
+  hashes = [
+    "h1:4f5LAYtUqOT2auWGwtaUmcjnby1yZg6e42rd7IAvbqk=",
+    "zh:194b72c9873ee69f232aec4a1522e12346672acf9de1f538c1a628dc6dc5b154",
+    "zh:1bcd45af89251e609ed8682f9a8d3af4c7c5d3921b37d04344ab5d1baec84207",
+    "zh:47c460c7b81bdda051e84444a0b70f78be90ea2aef97c3f83ad3a4d017ea00f7",
+    "zh:7b5630c6abc62284f513ac147aad9ec1cb740fd075b5b2116d9ec1b74e952f08",
+    "zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f",
+    "zh:91c529341e80008dd29114d81394f9948287aa88d7b1e3e7bd7ba35eb1b8db20",
+    "zh:ac0e8cdab26c3114c6c3e2b2861d84d81315b5f62f200b732dc43a5eb2cfa24c",
+    "zh:d1868ee6024e1973321b7db91caf654f9250622579bedf2272a6ca10c8259725",
+    "zh:f3973d8de6e949f4e5ab5c500453bdcaa8472648705b5e103b87b326a1925c1f",
+  ]
+}
