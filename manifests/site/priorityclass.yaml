@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: site-critical
+value: 100000
+globalDefault: false
+description: "Public site. Outranks tooling and monitoring."
