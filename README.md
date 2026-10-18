@@ -15,6 +15,7 @@ graph TB
     Actions[GitHub Actions<br/>Build + Push]
     GHCR[GHCR<br/>ghcr.io/cdub-63/christian-wallace-site]
     HCP[HCP Terraform<br/>state + plan/apply]
+    UR[UptimeRobot<br/>external HTTP check]
 
     subgraph Hetzner ["Hetzner CX33, Falkenstein, DE (178.105.67.27)"]
         subgraph k3s ["k3s Cluster"]
@@ -43,6 +44,8 @@ graph TB
     GH -->|push to terraform/| HCP
     HCP -->|auto-apply| Hetzner
     HCP -->|auto-apply| CF
+    HCP -->|auto-apply| UR
+    UR -->|HTTPS every 5 min| CF
     Actions -->|docker push| GHCR
     GH -->|polls for changes| ArgoCD
     ArgoCD -->|reconcile manifests| Site
@@ -57,7 +60,7 @@ graph TB
 christian-wallace.com/
 ├── Dockerfile          # nginx:alpine image with site/ baked in
 ├── docs/               # Why each tool is here, lessons learned
-├── terraform/          # Hetzner + Cloudflare, applied by HCP Terraform on push
+├── terraform/          # Hetzner + Cloudflare + UptimeRobot, applied by HCP Terraform on push
 │   ├── main.tf
 │   ├── variables.tf
 │   ├── outputs.tf
@@ -81,7 +84,7 @@ christian-wallace.com/
 | Layer | Tool | Purpose |
 |---|---|---|
 | **DNS** | Cloudflare | Domain management, proxying |
-| **Infrastructure** | Terraform + Hetzner | Server, firewall, SSH key, and DNS records as code |
+| **Infrastructure** | Terraform + Hetzner | Server, firewall, SSH key, DNS records, and uptime monitor as code |
 | **Infra GitOps** | HCP Terraform (VCS-driven) | Remote state with locking and history; a push touching `terraform/` plans and auto-applies, the Terraform equivalent of ArgoCD |
 | **Kubernetes** | k3s | Lightweight single-node cluster |
 | **Ingress** | Traefik | HTTP/HTTPS routing (k3s built-in) |
@@ -94,6 +97,6 @@ christian-wallace.com/
 | **CNI** | Cilium (eBPF) | Pod networking, NetworkPolicy enforcement, and Service load balancing (replaces kube-proxy); replaced Flannel which silently ignores NetworkPolicy |
 | **Observability** | Prometheus + Grafana | Metrics and dashboards |
 | **Grafana storage** | Kubernetes PVC (local-path, 1Gi) | Persists Grafana's SQLite DB across pod restarts |
-| **Uptime monitoring** | UptimeRobot | External uptime checks with email alerts |
+| **Uptime monitoring** | UptimeRobot (Terraform-managed) | External HTTPS check every 5 minutes with email alerts, defined in `terraform/main.tf` |
 | **Alerting** | Alertmanager + Discord | Routes Prometheus alerts (including memory-near-limit and OOMKill rules) to a Discord channel |
 | **Dead man's switch** | healthchecks.io | Alertmanager pings it every minute via the always-firing `Watchdog` alert; if pings stop for ~10 minutes, it posts to Discord |
