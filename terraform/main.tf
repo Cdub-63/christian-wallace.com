@@ -57,34 +57,31 @@ resource "hcloud_ssh_key" "default" {
   public_key = file("${path.module}/ssh_key.pub")
 }
 
+data "cloudflare_ip_ranges" "cloudflare" {}
+
+# SSH and the k8s API are reachable only over Tailscale; web traffic only via Cloudflare's proxy
 resource "hcloud_firewall" "k3s" {
   name = "k3s-firewall"
 
   rule {
     direction  = "in"
     protocol   = "tcp"
-    port       = "22"
-    source_ips = ["0.0.0.0/0", "::/0"]
-  }
-
-  rule {
-    direction  = "in"
-    protocol   = "tcp"
     port       = "80"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = concat(data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks, data.cloudflare_ip_ranges.cloudflare.ipv6_cidr_blocks)
   }
 
   rule {
     direction  = "in"
     protocol   = "tcp"
     port       = "443"
-    source_ips = ["0.0.0.0/0", "::/0"]
+    source_ips = concat(data.cloudflare_ip_ranges.cloudflare.ipv4_cidr_blocks, data.cloudflare_ip_ranges.cloudflare.ipv6_cidr_blocks)
   }
 
+  # Lets Tailscale peers connect directly instead of through a DERP relay
   rule {
     direction  = "in"
-    protocol   = "tcp"
-    port       = "6443"
+    protocol   = "udp"
+    port       = "41641"
     source_ips = ["0.0.0.0/0", "::/0"]
   }
 }

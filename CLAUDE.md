@@ -4,7 +4,8 @@ Personal portfolio site — deployed via GitOps on k3s (Hetzner).
 
 ## Access
 
-- **SSH:** `ssh k3s` (root@178.105.67.27, Falkenstein)
+- **SSH:** `ssh k3s` (root@k3s.tailba717.ts.net, Tailscale only; Falkenstein)
+- **kubectl:** https://k3s.tailba717.ts.net:6443 (Tailscale only)
 - **ArgoCD:** https://argocd.tailba717.ts.net (Tailscale only)
 - **Grafana:** https://grafana.tailba717.ts.net (Tailscale only)
 - **Site:** https://christian-wallace.com
