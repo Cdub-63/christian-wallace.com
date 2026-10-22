@@ -115,3 +115,9 @@ Real issues hit during the build, documented here because they're the kind of th
 **Problem:** After the move to Falkenstein, there was no way to confirm what UptimeRobot was checking without logging in to its dashboard. It turned out to check the domain through Cloudflare, so the move hadn't broken it, but it was the only piece of external infrastructure not in code. Bringing it under Terraform had a trap: the provider sends exactly what the config says, so a monitor resource without `assigned_alert_contacts` would quietly remove the email alert contact on the first apply. And because CLI applies are rejected, `terraform import` from a laptop wasn't an option.
 
 **Solution:** Read the live monitor from the UptimeRobot API and wrote the resource to match it field for field, including the alert contact ID. Used a Terraform `import` block in `main.tf` so HCP Terraform took over the existing monitor on merge instead of creating a duplicate. The speculative plan on the PR showed one import and no other changes, and `terraform plan` after the apply showed no changes. The API key is a sensitive workspace variable sourced from 1Password, like the Hetzner and Cloudflare tokens.
+
+## Adding Tailscale to the node took the site down
+
+**Problem:** Installing Tailscale on the k3s host so SSH and the Kubernetes API could leave the public internet immediately broke the site (Cloudflare 522). Tailscale's default iptables rules interfered with the svclb hostPort path that carries web traffic to Traefik.
+
+**Solution:** Ran Tailscale with `--netfilter-mode=off`, which leaves iptables alone. The Hetzner firewall already does inbound filtering, so Tailscale's rules weren't needed. Then closed ports 22 and 6443 publicly and limited 80/443 to Cloudflare's IP ranges.
