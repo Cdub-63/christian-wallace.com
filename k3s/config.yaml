@@ -2,3 +2,6 @@
 flannel-backend: none
 disable-network-policy: true
 disable-kube-proxy: true
+# Lets kubectl reach the API server over Tailscale by the host's MagicDNS name
+tls-san:
+  - k3s.tailba717.ts.net

@@ -50,5 +50,10 @@ write_files:
 
       kubectl apply -f manifests/argocd/root-app.yaml
 
+      # SSH and the k8s API are reachable only over Tailscale; after boot, run
+      # `tailscale up --hostname=k3s --netfilter-mode=off` from the Hetzner web console and disable key expiry
+      # for the node in the Tailscale admin. Tailscale's iptables rules break the svclb hostPort path to Traefik.
+      curl -fsSL https://tailscale.com/install.sh | sh
+
 runcmd:
   - [/usr/local/sbin/bootstrap-k3s.sh]
