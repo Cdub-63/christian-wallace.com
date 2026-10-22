@@ -17,7 +17,7 @@ graph TB
     HCP[HCP Terraform<br/>state + plan/apply]
     UR[UptimeRobot<br/>external HTTP check]
 
-    subgraph Hetzner ["Hetzner CX33, Falkenstein, DE (178.105.67.27)"]
+    subgraph Hetzner ["Hetzner CX33, Falkenstein, DE"]
         subgraph k3s ["k3s Cluster"]
             Traefik[Traefik Ingress<br/>:80 / :443]
 
@@ -38,7 +38,7 @@ graph TB
     LE[Let's Encrypt<br/>ACME]
 
     User -->|HTTPS| CF
-    CF -->|A record → 178.105.67.27, proxied| Traefik
+    CF -->|A record → origin, proxied| Traefik
     Traefik --> Site
     GH -->|push triggers| Actions
     GH -->|push to terraform/| HCP
