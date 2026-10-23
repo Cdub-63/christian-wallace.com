@@ -52,15 +52,6 @@ resource "cloudflare_record" "www" {
   proxied = true
 }
 
-# The #21 apply failed mid-create and left "site" tainted with no initial settings; destroying it errors, so forget it instead.
-removed {
-  from = cloudflare_zone_settings_override.site
-
-  lifecycle {
-    destroy = false
-  }
-}
-
 resource "cloudflare_zone_settings_override" "zone" {
   zone_id = var.cloudflare_zone_id
 
