@@ -57,6 +57,8 @@ resource "cloudflare_zone_settings_override" "site" {
 
   settings {
     always_use_https = "on"
+    ssl              = "strict"
+    min_tls_version  = "1.2"
   }
 }
 
