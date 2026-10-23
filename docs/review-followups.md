@@ -10,6 +10,7 @@ Work items from the October 2026 external review of the site and cluster.
 - [x] nginx hardening: security headers (CSP, HSTS, nosniff, Referrer-Policy, Permissions-Policy, frame-ancestors), cache headers, custom 404 (PR #20)
 - [x] README no longer mentions a blog (PR #20)
 - [x] HPA/PDB single-node limits documented in `docs/why-each-tool.md` (PR #20)
+- [x] HTTP redirects to HTTPS at Cloudflare (Always Use HTTPS, in Terraform); securityheaders.com grade A
 
 ## Remaining
 

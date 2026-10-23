@@ -52,6 +52,14 @@ resource "cloudflare_record" "www" {
   proxied = true
 }
 
+resource "cloudflare_zone_settings_override" "site" {
+  zone_id = var.cloudflare_zone_id
+
+  settings {
+    always_use_https = "on"
+  }
+}
+
 resource "hcloud_ssh_key" "default" {
   name       = "christian-mac"
   public_key = file("${path.module}/ssh_key.pub")
