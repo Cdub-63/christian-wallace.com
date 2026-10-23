@@ -6,11 +6,10 @@ Work items from the October 2026 external review of the site and cluster.
 
 - [x] Host joined to the tailnet; SSH and kubectl via `k3s.tailba717.ts.net` (PR #16)
 - [x] Ports 22 and 6443 closed publicly; 80/443 allowed only from Cloudflare ranges; origin IP removed from README (PR #17)
+- [x] Link previews (meta description, Open Graph/Twitter tags, favicons) on every page; headshot moved out of the HTML to `site/images/headshot.webp` (PR #19)
 
 ## Remaining
 
-- [ ] **Link previews:** add a meta description, Open Graph/Twitter tags, and a favicon to every page in `site/`
-- [ ] **Headshot:** move the base64 headshot out of `index.html` and `engineering.html` into `site/images/` as WebP
 - [ ] **nginx hardening** (`default.conf`): security headers (CSP, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, frame-ancestors), cache headers for static assets, and a custom 404 page. Cloudflare already handles compression, so skip gzip. Check with securityheaders.com afterward.
 - [ ] **CI gates** (`.github/workflows/build-push.yml`): pin actions to commit SHAs, add a Trivy image scan, and add an HTML and link check
 - [ ] **README:** remove the mention of a blog, or build one
