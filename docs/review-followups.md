@@ -10,12 +10,12 @@ Work items from the October 2026 external review of the site and cluster.
 - [x] nginx hardening: security headers (CSP, HSTS, nosniff, Referrer-Policy, Permissions-Policy, frame-ancestors), cache headers, custom 404 (PR #20)
 - [x] README no longer mentions a blog (PR #20)
 - [x] HPA/PDB single-node limits documented in `docs/why-each-tool.md` (PR #20)
-- [x] HTTP redirects to HTTPS at Cloudflare (Always Use HTTPS, in Terraform); securityheaders.com grade A
+- [x] HTTP redirects to HTTPS at Cloudflare (Always Use HTTPS, in Terraform); securityheaders.com grade A+ (PRs #21-23)
+- [x] Replaced the unmeasured 99.999% Transit Gateway uptime claim (based on the AWS SLA, which is 99.99%) with zero customer-impacting incidents since cutover
 
 ## Remaining
 
 - [ ] **CI gates** (`.github/workflows/build-push.yml`): pin actions to commit SHAs, add a Trivy image scan, and add an HTML and link check
-- [ ] **Interview prep:** have an answer for how the 99.999% Transit Gateway uptime figure on `engineering.html` was measured
 
 ## Skipped
 
