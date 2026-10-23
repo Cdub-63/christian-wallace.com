@@ -6,7 +6,7 @@ Work items from the October 2026 external review of the site and cluster.
 
 - [x] Host joined to the tailnet; SSH and kubectl via `k3s.tailba717.ts.net` (PR #16)
 - [x] Ports 22 and 6443 closed publicly; 80/443 allowed only from Cloudflare ranges; origin IP removed from README (PR #17)
-- [x] Link previews (meta description, Open Graph/Twitter tags, favicons) on every page; headshot moved out of the HTML to `site/images/headshot.webp`
+- [x] Link previews (meta description, Open Graph/Twitter tags, favicons) on every page; headshot moved out of the HTML to `site/images/headshot.webp` (PR #19)
 
 ## Remaining
 
