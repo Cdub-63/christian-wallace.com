@@ -16,6 +16,8 @@ Every tool here replaces something painful. This is what the stack looks like wi
 
 **Without ArgoCD:** Deploying would mean SSHing in or running `kubectl apply` from a laptop, with no rollback and no record of what changed. ArgoCD reconciles the cluster to Git on every push; rollback is `git revert`.
 
+**Without the HPA and PDB:** One crashed or OOMKilled nginx pod would take the site down until it restarted. The HPA keeps at least 2 replicas (up to 3 under CPU load) and the PDB allows only one to be evicted at a time, so one pod keeps serving. That protection stops at the node. Both replicas run on the same single node, so a reboot, a k3s crash, or a Hetzner host failure takes the site down no matter how many replicas there are. Draining that node also stalls: the first pod is evicted with nowhere to go, and the PDB then blocks evicting the second. Surviving node loss would take a second node with the replicas spread across both.
+
 **Without Alertmanager routing:** Alerts fire but go nowhere. Grafana was OOMKilled about 30 times in one week and nobody knew until it was spotted by hand. Now every warning and critical alert lands in Discord.
 
 **Without a dead man's switch:** If Prometheus, Alertmanager, or the node dies, alerts stop, and silence looks exactly like "everything is fine." The `Watchdog` alert always fires on purpose and is routed to healthchecks.io once a minute. When the pings stop, healthchecks.io, which runs outside the cluster, raises the alarm. Coverage is layered: UptimeRobot catches the site being down from outside, Alertmanager catches problems inside the cluster, and healthchecks.io catches the monitoring itself being broken.

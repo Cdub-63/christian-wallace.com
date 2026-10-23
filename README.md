@@ -1,6 +1,6 @@
 # christian-wallace.com
 
-Personal portfolio and Kubernetes homelab. Resume, blog, and more, deployed via GitOps on a self-managed k3s cluster.
+Personal portfolio and Kubernetes homelab. Resume and engineering background, deployed via GitOps on a self-managed k3s cluster.
 
 - [How each tool earns its place](docs/why-each-tool.md): what the stack would look like without each piece
 - [Challenges & lessons learned](docs/lessons-learned.md): real issues hit during the build and how they were fixed

@@ -6,6 +6,8 @@ on:
     paths:
       - 'site/**'
       - 'Dockerfile'
+      - 'default.conf'
+      - 'nginx.conf'
       - '.github/workflows/**'
   workflow_dispatch:
 
