@@ -8,36 +8,82 @@ on:
       - 'Dockerfile'
       - 'default.conf'
       - 'nginx.conf'
+      - '.htmlvalidate.json'
+      - '.github/workflows/**'
+  pull_request:
+    paths:
+      - 'site/**'
+      - 'Dockerfile'
+      - 'default.conf'
+      - 'nginx.conf'
+      - '.htmlvalidate.json'
       - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Validate HTML
+        run: npx --yes html-validate@9.7.1 site/*.html
+
+      - name: Check links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          # LinkedIn and Instagram block CI runners
+          args: >-
+            --no-progress
+            --exclude linkedin.com
+            --exclude instagram.com
+            'site/*.html'
+          fail: true
+
   build-push:
+    needs: check
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: Build image
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        with:
+          context: .
+          load: true
+          tags: |
+            ghcr.io/cdub-63/christian-wallace-site:latest
+            ghcr.io/cdub-63/christian-wallace-site:${{ github.sha }}
+
+      - name: Scan image
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ghcr.io/cdub-63/christian-wallace-site:${{ github.sha }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
 
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: |
-            ghcr.io/cdub-63/christian-wallace-site:latest
-            ghcr.io/cdub-63/christian-wallace-site:${{ github.sha }}
+      - name: Push image
+        if: github.event_name != 'pull_request'
+        run: docker push --all-tags ghcr.io/cdub-63/christian-wallace-site
 
       - name: Update deployment manifest
+        if: github.event_name != 'pull_request'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

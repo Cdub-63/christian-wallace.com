@@ -27,7 +27,7 @@ Every infra change goes through code in this repo — never the Hetzner/Cloudfla
 - **Ingress:** Traefik (k3s built-in), TLS via cert-manager + Let's Encrypt, for the public site only
 - **Admin UIs:** Grafana and ArgoCD are reachable only over Tailscale, via the Tailscale operator's ingresses in `manifests/tailscale/` (TLS from Tailscale). Operator OAuth client lives in the `operator-oauth` Secret in `tailscale`, sourced from `op://Personal/Tailscale/{Client ID,Client secret}`
 - **GitOps:** ArgoCD (auto-sync + self-heal)
-- **CI/CD:** GitHub Actions — builds Docker image, pushes to GHCR, updates image tag + change-cause annotation in `manifests/site/deployment.yaml`, commits back
+- **CI/CD:** GitHub Actions (actions pinned to commit SHAs) — validates HTML (html-validate) and links (lychee), builds the image, fails on fixable HIGH/CRITICAL Trivy findings; on main only, pushes to GHCR, updates image tag + change-cause annotation in `manifests/site/deployment.yaml`, commits back
 - **Site:** nginx:alpine (non-root, port 8080), HTML in `site/`
 - **Observability:** kube-prometheus-stack in `monitoring` namespace; Grafana at grafana.tailba717.ts.net. Alertmanager routes alerts to Discord and pings healthchecks.io every minute from `Watchdog` (dead man's switch); both URLs live in the `alertmanager-discord` Secret, sourced from `op://K3s/alertmanager-discord/{webhook-url,healthchecks-url}`
 - **Uptime monitoring:** UptimeRobot HTTP monitor on https://christian-wallace.com, managed as `uptimerobot_monitor.site` in `terraform/main.tf`. Its `assigned_alert_contacts` must list every contact that should be notified; leaving one out removes it. API key is the `uptimerobot_api_key` workspace variable, sourced from `op://K3s/uptimerobot/api-key`
