@@ -38,6 +38,7 @@ jobs:
           # LinkedIn and Instagram block CI runners
           args: >-
             --no-progress
+            --root-dir ${{ github.workspace }}/site
             --exclude linkedin.com
             --exclude instagram.com
             'site/*.html'
