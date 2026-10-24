@@ -92,4 +92,5 @@ jobs:
           sed -i "s|kubernetes.io/change-cause:.*|kubernetes.io/change-cause: \"${{ github.sha }}\"|" manifests/site/deployment.yaml
           git add manifests/site/deployment.yaml
           git commit -m "ci: deploy site image ${{ github.sha }}"
+          git pull --rebase origin main
           git push
